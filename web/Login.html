@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Login Page
+{% endblock %}
+{% block style %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="d-flex login_use ">
+            <div class="container align-content-center justify-content-center">
+                <div class="shadow card">
+                    <div class="card-body">
+                        <div class="card-title"><h1>Login</h1></div>
+                        <div class="form-floating mb-3">
+                            <input id="LoginUsername" name="username" type="text" class="form-control"
+                                   placeholder="Username" required="">
+                            <label for="LoginUsername">Username</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input id="LoginPassword" name="password" type="password" class="form-control"
+                                   placeholder="Password" required="">
+                            <label for="LoginPassword">Password</label>
+                        </div>
+                        <div class="mb-3">
+                            <a href="{% url 'account:forget_password' %}">Forgot Password?</a>
+                        </div>
+                        <div class="mb-3">
+                            <input type="submit" value="Login" class="btn btn-primary"/>
+                        </div>
+                        <p>Don't have an account? <a href="{% url 'account:register' %}">Sign Up Now</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
