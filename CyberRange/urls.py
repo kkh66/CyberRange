@@ -19,4 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', include('account.urls', namespace='account')),
+    path('groups/', include('group.urls', namespace='group')),
+
 ]
