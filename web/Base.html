@@ -118,19 +118,6 @@
                                         </nav>
                                     </div>
                                     <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
-                                       data-bs-target="#pagesCollapseStudent" aria-expanded="false"
-                                       aria-controls="pagesCollapseStudent">
-                                        Student Management
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseStudent" aria-labelledby="headingOne"
-                                         data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="#">Add learner</a>
-                                            <a class="nav-link" href="#">Manage learner</a>
-                                        </nav>
-                                    </div>
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
                                        data-bs-target="#pagesCollapseGroup" aria-expanded="false"
                                        aria-controls="pagesCollapseGroup">
                                         Group Management
@@ -139,8 +126,7 @@
                                     <div class="collapse" id="pagesCollapseGroup" aria-labelledby="headingOne"
                                          data-bs-parent="#sidenavAccordionPages">
                                         <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="#">Create Group</a>
-                                            <a class="nav-link" href="#">Manage Group</a>
+                                            <a class="nav-link" href="{% url 'group:group_list' %}">View Group</a>
                                         </nav>
                                     </div>
                                 </nav>

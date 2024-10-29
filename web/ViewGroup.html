@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>{{ group.name }}</h2>
+                {% if request.user.is_staff %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addStudentModal">
+                        Add Students
+                    </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ group.description }}</p>
+                <p class="card-text"><small class="text-muted">Class Code: {{ group.code }}</small></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left column for announcements -->
+            <div class="col-md-8">
+                {% if request.user.is_staff %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Make an Announcement</h5>
+                            <form method="post" action="{% url 'group:create_announcement' group.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="announcement_title" class="form-label">Title (optional)</label>
+                                    <input type="text" class="form-control" id="announcement_title" name="title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="announcement_text" class="form-label">Announcement</label>
+                                    <textarea class="form-control" id="announcement_text" name="announcement" rows="3"
+                                              required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Post Announcement</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="announcements">
+                    <h3 class="mb-3">Announcements</h3>
+                    {% for announcement in group.announcements.all %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                {% if announcement.title %}
+                                    <h5 class="card-title">{{ announcement.title }}</h5>
+                                {% endif %}
+                                <p class="card-text">{{ announcement.announcement }}</p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Posted by {{ announcement.created_by.username }}
+                                        on {{ announcement.created_at|date:"F d, Y" }}
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>No announcements yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right column for student list -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Students</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for student in group.students.all %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ student.username }}
+                                    {% if request.user.is_staff %}
+                                        <form method="post" action="{% url 'group:remove_student' group.id student.id %}"
+                                              style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                        </form>
+                                    {% endif %}
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">No students enrolled yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    {% if request.user.is_staff %}
+        <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'group:add_students' group.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="student_emails" class="form-label">Student Emails (one per line)</label>
+                                <textarea class="form-control" id="student_emails" name="student_emails" rows="5"
+                                          required></textarea>
+                                <small class="form-text text-muted">Enter the email addresses of students you want to
+                                    add to the group.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Students</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
