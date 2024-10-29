@@ -33,3 +33,11 @@
     font-size: 50px;
     color: gray;
 }
+
+.btn_custom {
+    background-color: #1a1e21 !important;
+}
+
+.card_custom{
+    border-radius: 25px !important;
+}
