@@ -1,0 +1,35 @@
+.login_use {
+    height: 100vh;
+}
+
+.login_use .container {
+    padding-left: 400px;
+}
+
+.login_use .card {
+    width: 400px;
+}
+
+.login_use .btn {
+    border-radius: 15px;
+    width: 200px;
+    margin-left: 70px;
+}
+
+.card-fp {
+    width: 200px;
+}
+
+.group_custom_card {
+    height: 250px !important;
+    border-radius: 25px !important;
+}
+
+.group_custom_card h1 {
+    font-size: 80px !important;
+}
+
+.group_custom_card .card-text {
+    font-size: 50px;
+    color: gray;
+}
