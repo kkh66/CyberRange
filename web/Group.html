@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Group{% endblock %}
+{% block style %}
+    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Group</h2>
+            <div class="d-flex justify-content-end">
+                {% if request.user.is_staff %}
+                    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal"
+                            data-bs-target="#createGroupModal">
+                        Create Group
+                    </button>
+                {% endif %}
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                    Add Group
+                </button>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for group in groups %}
+                <div class="col">
+                    <div class="card group_custom_card shadow-sm"
+                         onclick="window.location='{% url 'group:group_detail' group.id %}';"
+                         style="cursor: pointer;">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                            <h3 class="card-title text-truncate fw-bold mb-2">{{ group.name }}</h3>
+                            <p class="card-text">{{ group.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        No Group available.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    {% if request.user.is_staff %}
+        <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createGroupModalLabel">Create New Classroom</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'group:create_group' %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="group_name" name="group_name"
+                                       placeholder="Group Name"
+                                       required="">
+                                <label for="group_name">Group Name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="group_description" name="group_description"
+                                       placeholder="Group Description"
+                                       required=""></input>
+                                <label for="group_description" class="form-label">Description</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Create Classroom</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- Add Group  -->
+    <div class="modal fade" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'group:add_group' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input id="AddGroup" name="group_code" type="text" class="form-control"
+                                   placeholder="Username" required="">
+                            <label for="AddGroup">Enter Group Code</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" type="submit">Join</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block Script %}
+    <script>
+        // If there are any form submission errors, show the modal again
+        {% if form_errors %}
+            document.addEventListener('DOMContentLoaded', function () {
+                var createGroupModal = new bootstrap.Modal(document.getElementById('createGroupModal'));
+                createGroupModal.show();
+            });
+        {% endif %}
+    </script>
+{% endblock %}
