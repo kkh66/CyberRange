@@ -29,11 +29,11 @@ def register(request):
         if password1 == password2:
             if User.objects.filter(username=username).exists():
                 messages.error(request, 'Username already exists, choose another one')
-                return redirect('register')
+                return redirect('account:register')
             else:
                 if User.objects.filter(email=email).exists():
                     messages.error(request, 'Email already exists, choose another one')
-                    return redirect('register')
+                    return redirect('account:register')
                 else:
                     try:
                         validate_password(password1)
@@ -49,7 +49,7 @@ def register(request):
                             [user.email],
                         )
                         messages.success(request, "Registration Successful. Please check your email")
-                        return redirect('activate_user')
+                        return redirect('account:activate_user')
                     except ValidationError as e:
                         messages.error(request, ', '.join(e.messages))
                         return redirect('account:register')
