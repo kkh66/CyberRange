@@ -1,15 +1,29 @@
+import os
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.http import JsonResponse
+from django.db.models import Q
+import json
 from group.models import Group, GroupAnnouncement
 
 
 # Create your views here.
 @login_required
 def group_list(request):
-    groups = Group.objects.all()
+    if request.user.is_staff:
+        # Staff can only see groups they created or joined
+        groups = Group.objects.filter(
+            Q(staff=request.user) |  # Groups they created
+            Q(students=request.user)  # Groups they joined
+        ).distinct()
+    else:
+        # Students can only see groups they're enrolled in
+        groups = Group.objects.filter(students=request.user)
+    
     return render(request, 'Group.html', {'groups': groups})
 
 
@@ -105,3 +119,23 @@ def add_group(request):
             messages.error(request, 'Invalid group code. Please try again.')
 
     return redirect('group:group_list')
+
+
+@user_passes_test(lambda u: u.is_staff)
+def edit_group(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    
+    if request.method == 'POST':
+        name = request.POST.get('group_name')
+        description = request.POST.get('group_description')
+        
+        if name and description:
+            group.name = name
+            group.description = description
+            group.save()
+            messages.success(request, 'Group details updated successfully.')
+            
+    return redirect('group:group_detail', group_id=group_id)
+
+
+
