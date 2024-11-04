@@ -1,6 +1,5 @@
 import docker
 import random
-from django.conf import settings
 
 
 class DockerManager:
@@ -29,7 +28,6 @@ class DockerManager:
 
     def start_container(self, image_name, container_name):
         try:
-            # 检查是否已存在同名容器
             try:
                 old_container = self.client.containers.get(container_name)
                 old_container.remove(force=True)
