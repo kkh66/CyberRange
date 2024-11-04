@@ -23,7 +23,7 @@ def group_list(request):
     else:
         # Students can only see groups they're enrolled in
         groups = Group.objects.filter(students=request.user)
-    
+
     return render(request, 'Group.html', {'groups': groups})
 
 
@@ -73,20 +73,26 @@ def create_announcement(request, group_id):
 def add_students(request, group_id):
     if request.method == 'POST':
         group = get_object_or_404(Group, id=group_id)
-        student_emails = request.POST.get('student_emails', '').split()
+        student_ids = request.POST.getlist('student_ids', [])
 
         added_count = 0
-        for email in student_emails:
+        for student_id in student_ids:
             try:
-                student = User.objects.get(email=email.strip())
+                student = User.objects.get(
+                    id=student_id,
+                    is_staff=False,
+                    is_superuser=False
+                )
                 if student not in group.students.all():
                     group.students.add(student)
                     added_count += 1
             except User.DoesNotExist:
-                messages.warning(request, f'User with email {email} not found.')
+                continue
 
         if added_count > 0:
             messages.success(request, f'Successfully added {added_count} student(s) to the group.')
+        else:
+            messages.warning(request, 'No new students were added to the group.')
 
     return redirect('group:group_detail', group_id=group_id)
 
@@ -124,18 +130,44 @@ def add_group(request):
 @user_passes_test(lambda u: u.is_staff)
 def edit_group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    
+
     if request.method == 'POST':
         name = request.POST.get('group_name')
         description = request.POST.get('group_description')
-        
+
         if name and description:
             group.name = name
             group.description = description
             group.save()
             messages.success(request, 'Group details updated successfully.')
-            
+
     return redirect('group:group_detail', group_id=group_id)
 
 
+@user_passes_test(lambda u: u.is_staff)
+def search_students(request, group_id):
+    search_term = request.GET.get('term', '')
+    group = get_object_or_404(Group, id=group_id)
 
+    students = User.objects.filter(
+        Q(username__icontains=search_term) |
+        Q(email__icontains=search_term),
+        is_staff=False,
+        is_superuser=False
+    ).exclude(
+        id__in=group.students.all()
+    )[:10]
+
+    results = [{
+        'id': student.id,
+        'text': f"{student.username} ({student.email})",
+        'username': student.username,
+        'email': student.email
+    } for student in students]
+
+    return JsonResponse({
+        'results': results,
+        'pagination': {
+            'more': False
+        }
+    })

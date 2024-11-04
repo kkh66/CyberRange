@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container py-5">
+        <!-- Header with back button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="display-6 mb-0">
+                    <i class="fas fa-laptop-code me-2"></i>
+                    {{ group.name }} Scenarios
+                </h2>
+                <p class="text-muted mt-2">View all scenarios in this group</p>
+            </div>
+            <div>
+                <a href="{% url 'group:group_detail' group.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Group
+                </a>
+            </div>
+        </div>
+
+        <!-- Scenario cards -->
+        {% if group_scenarios %}
+            <div class="row g-4">
+                {% for group_scenario in group_scenarios %}
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow hover-card rounded-3 bg-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title mb-0">{{ group_scenario.scenario.name }}</h5>
+                                    <span class="badge bg-primary">{{ group_scenario.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <p class="card-text">{{ group_scenario.scenario.description }}</p>
+                                <div class="meta-info">
+                                    <small class="text-muted">
+                                        <i class="fa-brands fa-docker me-2"></i>
+                                        {{ group_scenario.scenario.docker_name }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'scenario:start_scenario' group_scenario.scenario.id %}"
+                                   class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-play me-1"></i>Start Scenario
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="row min-vh-50 align-items-center justify-content-center">
+                <div class="col-md-6">
+                    <div class="card text-center p-5 shadow bg-white rounded-3">
+                        <div class="card-body">
+                            <i class="fas fa-info-circle fa-3x text-info mb-4"></i>
+                            <h4 class="card-title mb-3">No Scenarios Available</h4>
+                            <p class="card-text text-muted">No scenarios available in this group yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .meta-info {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+    </style>
+{% endblock %}

@@ -38,6 +38,39 @@
     background-color: #1a1e21 !important;
 }
 
-.card_custom{
+.card_custom {
     border-radius: 25px !important;
 }
+
+#classCode {
+    margin: 0;
+    padding: 0;
+}
+
+.text-muted {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.tooltip {
+    font-size: 14px;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #333;
+    padding: 6px 12px;
+}
+
+.icon-group {
+    display: flex;
+    align-items: center;
+}
+
+.btn_icon {
+    padding: 2px 6px !important;
+    line-height: 1;
+    border: none;
+    background: transparent;
+}
+
+
