@@ -1,0 +1,121 @@
+.announcement_card {
+    border-left: 4px solid #0061f2 !important;
+    margin-bottom: 1rem;
+}
+
+.student_item {
+    border: none;
+    margin-bottom: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.student_item:hover {
+    background: #e9ecef;
+}
+
+.btn_group_custom {
+    background: linear-gradient(135deg, #0061f2 0%, #6e00ff 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn_group_custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(110, 0, 255, 0.4);
+}
+
+.code-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.code-container code {
+    color: white;
+    font-size: 0.95rem;
+}
+
+.copy-button {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.copy-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.code-box {
+    display: flex;
+    align-items: center;
+}
+
+.header_card .card-header {
+    background: transparent;
+    border: none;
+}
+
+.header_card {
+    background: linear-gradient(135deg, #0061f2 0%, #6e00ff 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.action_btn {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    font-size: 0.95rem;
+}
+
+.action_btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateX(-5px);
+    color: white;
+}
+
+.action_btn i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.action_menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stats_item {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.group_info {
+    max-width: 70%;
+}
+
+.group_info h2 {
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+}
