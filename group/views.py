@@ -56,18 +56,26 @@ def create_announcement(request, group_id):
         group = get_object_or_404(Group, id=group_id)
         title = request.POST.get('title')
         announcement_text = request.POST.get('announcement')
+        attachment = request.FILES.getlist('attachment')
 
         if announcement_text:
-            GroupAnnouncement.objects.create(
+            announcement = GroupAnnouncement.objects.create(
                 group=group,
                 title=title,
                 announcement=announcement_text,
                 created_by=request.user
             )
+
+            for file in attachment:
+                if file.content_type in ['application/pdf', 'text/plain']:
+                    announcement.attachment.add(file)
+                else:
+                    messages.error(request, 'Only PDF and TXT files are allowed.')
+
+            announcement.save()
             messages.success(request, 'Announcement posted successfully.')
 
     return redirect('group:group_detail', group_id=group_id)
-
 
 @user_passes_test(lambda u: u.is_staff)
 def add_students(request, group_id):
