@@ -65,7 +65,7 @@ def create_announcement(request, group_id):
         title = request.POST.get('title')
         announcement_text = request.POST.get('announcement')
         files = request.FILES.getlist('pdf_file')
-        links = json.loads(request.POST.get('links', '[]'))  # 获取链接数据
+        links = json.loads(request.POST.get('links', '[]'))
 
         if announcement_text:
             with transaction.atomic():
