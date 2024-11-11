@@ -127,6 +127,20 @@
                                        id="docker_image{{ group_scenario.scenario.id }}"
                                        name="docker_image" value="{{ group_scenario.scenario.docker_name }}" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="time_limit{{ group_scenario.scenario.id }}" class="form-label">
+                                    Time Limit (minutes)
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="time_limit{{ group_scenario.scenario.id }}"
+                                       name="time_limit" 
+                                       value="{{ group_scenario.scenario.time_limit }}" 
+                                       min="1" 
+                                       max="480" 
+                                       required>
+                                <div class="form-text">Set between 1 and 480 minutes (8 hours)</div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

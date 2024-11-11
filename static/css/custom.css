@@ -77,18 +77,30 @@
     position: relative;
 }
 
+<<<<<<< HEAD
+.form-floating input {
+    padding-left: 30px;
+    width: 100%;
+=======
 .form-floating input{
     padding-left: 30px;
     width: 100%; 
+>>>>>>> dev
 }
 
 .form-floating.form_login {
     position: relative;
 }
 
+<<<<<<< HEAD
+.form-floating.form_login label {
+    margin-top: -12px;
+    transform: translateY(0) !important;
+=======
 .form-floating.form_login label{
     margin-top: -12px; 
     transform:translateY(0) !important;
+>>>>>>> dev
     transition: opacity 0.6s ease;
     opacity: 0.9;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -105,9 +117,15 @@
     filter: brightness(0) saturate(100%) invert(36%) sepia(89%) saturate(250%) hue-rotate(200deg) brightness(95%) contrast(85%);
 }
 
+<<<<<<< HEAD
+.form-floating.form_login input {
+    padding-left: 30px;
+    width: 100%;
+=======
 .form-floating.form_login input{
     padding-left: 30px;
     width: 100%; 
+>>>>>>> dev
 }
 
 .login-icon {
@@ -123,9 +141,17 @@
     width: 16px;
     opacity: 0.6;
     transition: opacity 0.5s ease;
+<<<<<<< HEAD
+    filter: none;
+}
+
+.form_login .form-control {
+    padding-left: 40px;
+=======
     filter:none;
 }
 
 .form_login .form-control {
     padding-left: 40px; 
+>>>>>>> dev
 }
