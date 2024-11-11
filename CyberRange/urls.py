@@ -24,6 +24,10 @@ urlpatterns = [
     path('groups/', include('group.urls', namespace='group')),
     path('scenario/', include('scenario.urls', namespace='scenario')),
     path('admin/', admin.site.urls),
+<<<<<<< HEAD
+=======
+    path('group/', include('group.urls', namespace='group')),
+>>>>>>> dev
 ]
 
 if settings.DEBUG:

@@ -8,11 +8,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
 import json
+<<<<<<< HEAD
 from group.models import Group, GroupAnnouncement, AnnouncementAttachment, AnnouncementLink
 from django.db import transaction
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+=======
+from group.models import Group, GroupAnnouncement, AnnouncementAttachment
+from django.db import transaction
+>>>>>>> dev
 
 
 # Create your views here.
@@ -65,7 +70,10 @@ def create_announcement(request, group_id):
         title = request.POST.get('title')
         announcement_text = request.POST.get('announcement')
         files = request.FILES.getlist('pdf_file')
+<<<<<<< HEAD
         links = json.loads(request.POST.get('links', '[]'))  # 获取链接数据
+=======
+>>>>>>> dev
 
         if announcement_text:
             with transaction.atomic():
@@ -75,10 +83,19 @@ def create_announcement(request, group_id):
                     announcement=announcement_text,
                     created_by=request.user
                 )
+<<<<<<< HEAD
 
                 # 处理文件上传
                 for file in files:
                     file_extension = os.path.splitext(file.name)[1].lower()
+=======
+                
+                for file in files:
+                    # Get file extension
+                    file_extension = os.path.splitext(file.name)[1].lower()
+                    
+                    # Check if file type is allowed
+>>>>>>> dev
                     if file_extension == '.pdf' and file.content_type == 'application/pdf':
                         AnnouncementAttachment.objects.create(
                             announcement=announcement,
@@ -93,6 +110,7 @@ def create_announcement(request, group_id):
                         messages.error(request, 'Only PDF and TXT files are allowed.')
                         announcement.delete()
                         return redirect('group:group_detail', group_id=group_id)
+<<<<<<< HEAD
 
                 for link_data in links:
                     AnnouncementLink.objects.create(
@@ -104,6 +122,9 @@ def create_announcement(request, group_id):
                         domain=link_data['domain']
                     )
 
+=======
+                        
+>>>>>>> dev
             messages.success(request, 'Announcement posted successfully.')
         else:
             messages.error(request, 'Please provide an announcement text.')
