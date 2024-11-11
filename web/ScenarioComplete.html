@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+    <link href="{% static 'css/rating.css' %}" rel="stylesheet">
+    <script src="{% static 'js/rating.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">Congratulations on Completing the {{ scenario.name }}!</h2>
+
+                        <!-- Overall Scenario Rating -->
+                        <form method="post" action="{% url 'scenario:submit_completion_ratings' scenario.id %}"
+                              id="ratingForm" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <h4>Overall Scenario Rating <span class="text-danger">*</span></h4>
+                                <div class="star-rating mb-2">
+                                    {% for i in "54321" %}
+                                        <input type="radio" name="scenario_rating" value="{{ i }}"
+                                               id="scenario-star{{ i }}">
+                                        <label for="scenario-star{{ i }}" class="star">
+                                            <i class="fas fa-star"></i>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-danger d-none" id="scenarioRatingError">
+                                    Please rate the overall scenario before submitting
+                                </div>
+                                <textarea name="scenario_comment" class="form-control"
+                                          placeholder="Overall comments (optional)"></textarea>
+                            </div>
+
+                            <!-- Individual Step Ratings -->
+                            <h4>Step Ratings (Optional)</h4>
+                            {% for step in steps %}
+                                <div class="step-rating mb-3">
+                                    <h5>Step {{ forloop.counter }}: {{ step.step_content }}</h5>
+                                    <div class="star-rating mb-2">
+                                        {% for i in "54321" %}
+                                            <input type="radio" name="step_{{ step.id }}_rating"
+                                                   value="{{ i }}" id="step{{ step.id }}-star{{ i }}">
+                                            <label for="step{{ step.id }}-star{{ i }}" class="star">
+                                                <i class="fas fa-star"></i>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                    <textarea name="step_{{ step.id }}_comment" class="form-control"
+                                              placeholder="Comments for this step (optional)"></textarea>
+                                </div>
+                            {% endfor %}
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn_custom_rating" id="submitButton"
+                                        disabled>Submit Ratings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
