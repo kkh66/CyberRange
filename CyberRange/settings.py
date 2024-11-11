@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-import os
+
 from pathlib import Path
 import os
 from django.contrib import messages
@@ -81,9 +81,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FYP',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
+        'USER': 'FYPProject',
+        'PASSWORD': 'konghang9',
+        'HOST': '192.168.0.120',
         'PORT': '3306',
     }
 }
@@ -169,10 +169,9 @@ AXES_LOCKOUT_TEMPLATE = None
 AXES_LOCKOUT_URL = None
 AXES_RESET_ON_SUCCESS = True
 
+
 AUTHENTICATION_BACKENDS = [
     'account.views.CustomAxesBackend',  # Our custom backend
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
