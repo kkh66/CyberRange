@@ -13,6 +13,9 @@ from django.utils.html import strip_tags
 from CyberRange.utils import generate_code
 from .models import PasswordResetRequest, StaffActivationPin, UserActivationPin
 from django.contrib.auth.decorators import login_required, user_passes_test
+from axes.handlers.proxy import AxesProxyHandler
+from axes.backends import AxesBackend
+from axes.helpers import get_lockout_response
 
 
 # Student Functions
@@ -80,20 +83,50 @@ def activate_user(request):
     return render(request, 'ActiveAccount.html')
 
 
+class CustomAxesBackend(AxesBackend):
+    def get_lockout_response(self, request, credentials):
+        messages.error(
+            request,
+            'This account has been locked due to too many failed attempts. '
+            'Please try again after 24 hours.'
+        )
+        return render(request, 'Login.html')
+
+
 def login(request):
     if request.user.is_authenticated:
-        return redirect('account:console')
+        return redirect('scenario:console')
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = auth.authenticate(username=username, password=password)
+        
+        handler = AxesProxyHandler()
+        
+        if handler.is_locked(request):
+            messages.error(
+                request,
+                'This account has been locked due to too many failed attempts. '
+                'Please try again after 24 hours.'
+            )
+            return render(request, 'Login.html')
+
+        user = auth.authenticate(request=request, username=username, password=password)
+        
         if user is not None:
             auth.login(request, user)
             messages.success(request, 'You have successfully logged in.')
-            return redirect('account:console')
+            return redirect('scenario:console')
         else:
-            messages.error(request, 'Invalid username or password.')
-            return redirect('account:login')
+            failures = handler.get_failures(request)
+            attempts_remaining = 3 - failures 
+            
+            if attempts_remaining > 0:
+                messages.warning(
+                    request,
+                    f'Invalid login credentials. {attempts_remaining} attempts remaining before account lockout.'
+                )
+            return render(request, 'Login.html')
+            
     return render(request, 'Login.html')
 
 
@@ -147,11 +180,6 @@ def confirm_pin(request):
             messages.error(request, 'Invalid PIN or username')
             return render(request, 'ConfirmPassword.html')
     return render(request, 'ConfirmPassword.html')
-
-
-@login_required(login_url='account:login')
-def console(request):
-    return render(request, 'Console.html')
 
 
 def logout_use(request):
@@ -268,3 +296,7 @@ def btn_instructor_status(request, user_id):
     status = "activated" if staff_member.is_active else "deactivated"
     messages.success(request, f'Staff member {staff_member.username} has been {status}.')
     return redirect('account:Instructor_list')
+
+
+def handler404(request, exception):
+    return render(request, '404.html')

@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}{{ group.name }}{% endblock %}
 {% block styles %}
+<<<<<<< HEAD
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"/>
+    <link rel="stylesheet" href="{% static 'css/group.css' %}">
+=======
 <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 <link rel="stylesheet" href="{% static 'css/group.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -458,33 +464,203 @@
         });
     }
 </script>
+>>>>>>> dev
 {% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <div class="card header_card mb-4">
-        <div class="card-header p-4">
-            <div class="d-flex justify-content-between align-items-start">
-
-                <div class="group_info">
-                    <h2 class="mb-3 fw-bold">{{ group.name }}</h2>
-                    <p class="mb-3 opacity-90">{{ group.description }}</p>
-                    <div class="d-flex align-items-center gap-4">
-                        <div class="stats_item">
-                            <i class="fas fa-users me-2"></i>
-                            <span>{{ group.students.count }} Students</span>
+    <div class="container mt-4">
+        <div class="card header_card mb-4 ">
+            <div class="card-header p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="group_info">
+                        <h2 class="mb-3 fw-bold mb-custom">{{ group.name }}</h2>
+                        <p class="mb-3 opacity-90 mb-custom">{{ group.description }}</p>
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="stats_item">
+                                <i class="fas fa-users me-2"></i>
+                                <span>{{ group.students.count }} Students</span>
+                            </div>
+                            <div class="code-box">
+                                <span class="me-2">Class Code:</span>
+                                <div class="code-container">
+                                    <code id="classCode">{{ group.code }}</code>
+                                    <button onclick="copyCode()" class="copy-button" title="Copy Code">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="code-box">
-                            <span class="me-2">Class Code:</span>
-                            <div class="code-container">
-                                <code id="classCode">{{ group.code }}</code>
-                                <button onclick="copyCode()" class="copy-button" title="Copy Code">
-                                    <i class="fas fa-copy"></i>
+                    </div>
+
+
+                    {% if request.user.is_staff %}
+                        <div class="action_menu">
+                            <a href="{% url 'scenario:scenario_list' group.id %}" class="action_btn">
+                                <i class="fa-solid fa-eye me-2"></i>
+                                <span>View Scenario</span>
+                            </a>
+                            <a href="{% url 'scenario:create_scenario' group.id %}" class="action_btn">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                <span>Add Scenario</span>
+                            </a>
+                            <button type="button" class="action_btn" data-bs-toggle="modal"
+                                    data-bs-target="#editGroupModal">
+                                <i class="fa-regular fa-pen-to-square me-2"></i>
+                                <span>Edit Group</span>
+                            </button>
+                            <button type="button" class="action_btn" data-bs-toggle="modal"
+                                    data-bs-target="#addStudentModal">
+                                <i class="fa-solid fa-user-plus me-2"></i>
+                                <span>Add Students</span>
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="action_menu">
+                            <a href="{% url 'scenario:scenario_list' group.id %}" class="action_btn">
+                                <i class="fa-solid fa-book me-2"></i>
+                                <span>View Scenario</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                {% if request.user.is_staff %}
+                    <div class="card mb-4 card_custom_view">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">
+                                <i class="fas fa-bullhorn me-2"></i>
+                                Make an Announcement
+                            </h5>
+                            <form method="post" action="{% url 'group:create_announcement' group.id %}"
+                                  enctype="multipart/form-data" id="announcementForm">
+                                {% csrf_token %}
+                                <div class="mb-3 mb-custom">
+                                    <label for="announcement_title" class="form-label">Title (optional)</label>
+                                    <input type="text" class="form-control control_custom" id="announcement_title"
+                                           name="title">
+                                </div>
+                                <div class="mb-3 mb-custom">
+                                    <label for="announcement_text" class="form-label">Announcement</label>
+                                    <textarea class="form-control control_custom" id="announcement_text"
+                                              name="announcement" rows="3"
+                                              required></textarea>
+                                </div>
+                                <div class="mb-3 d-flex align-items-center gap-2 mb-custom">
+                                    <button type="button" class="btn btn-outline-primary custom_cancel"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#pdfUploadModal">
+                                        <i class="fas fa-file me-2"></i>Attach File
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary custom_cancel"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#linkModal">
+                                        <i class="fas fa-link me-2"></i>Add Link
+                                    </button>
+                                    <span id="selectedFileName" class="text-muted"></span>
+                                </div>
+                                <div id="selectedLinks" class="mb-3"></div>
+                                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf, .txt"
+                                       title="Please select PDF files only" class="d-none" multiple>
+                                <button type="submit" class="btn btn-primary btn_group_custom">Post Announcement
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- PDF Upload Modal -->
+                <div class="modal fade" id="pdfUploadModal" tabindex="-1" aria-labelledby="pdfUploadModalLabel"
+                     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content custom_view">
+                            <div class="modal-header header_custom">
+                                <h5 class="modal-title" id="pdfUploadModalLabel">Upload File</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3 mb-custom">
+                                    <label for="pdfInput" class="form-label">Select PDF or TXT File</label>
+                                    <input type="file" class="form-control control_custom" id="pdfInput"
+                                           accept=".pdf,.txt">
+                                </div>
+                                <div id="pdfPreviewContainer" class="d-none">
+                                    <h6 class="mb-2">Preview:</h6>
+                                    <div class="ratio ratio-16x9">
+                                        <iframe id="pdfPreview" class="border rounded"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer footer_custom">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="confirmPdfUpload">Confirm Upload
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
+<<<<<<< HEAD
+                <!-- Rest of your announcements display code -->
+                <div class="announcements">
+                    <h3 class="mb-4">
+                        <i class="fas fa-scroll me-2"></i>
+                        Announcements
+                    </h3>
+                    {% for announcement in announcements %}
+                        <div class="card announcement_card mb-3 mb-custom  card_custom_view">
+                            <div class="card-body">
+                                {% if announcement.title %}
+                                    <h5 class="card-title">{{ announcement.title }}</h5>
+                                {% endif %}
+                                <p class="card-text">{{ announcement.announcement }}</p>
+                                {% if announcement.attachments.exists %}
+                                    <div class="pdf-box-container mt-2">
+                                        {% for attachment in announcement.attachments.all %}
+                                            <a href="{{ attachment.pdf_file.url }}" class="pdf-box-link"
+                                               target="_blank">
+                                                <div class="pdf-box">
+                                                    {% if '.pdf' in attachment.pdf_file.name|lower %}
+                                                        <i class="fas fa-file-pdf pdf-icon"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-file-alt txt-icon"></i>
+                                                    {% endif %}
+                                                    <span class="pdf-filename">{{ attachment.filename }}</span>
+                                                </div>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% for link in announcement.links.all %}
+                                    <div class="link-preview mt-2">
+                                        <a href="{{ link.url }}" target="_blank" class="text-decoration-none">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        {% if link.favicon %}
+                                                            <img src="{{ link.favicon }}" width="16" height="16"
+                                                                 alt="{{ link.domain }}">
+                                                        {% endif %}
+                                                        <h6 class="mb-0">{{ link.title }}</h6>
+                                                    </div>
+                                                    {% if link.description %}
+                                                        <p class="text-muted small mt-1 mb-0">{{ link.description }}</p>
+                                                    {% endif %}
+                                                    <small class="text-muted">{{ link.domain }}</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                                <p class="card-text mt-3">
+                                    <small class="text-muted">
+                                        Posted by {{ announcement.created_by.username }}
+                                    </small>
+                                </p>
+=======
 
                 {% if request.user.is_staff %}
                 <div class="action_menu">
@@ -572,16 +748,50 @@
                                 <div class="ratio ratio-16x9">
                                     <iframe id="pdfPreview" class="border rounded"></iframe>
                                 </div>
+>>>>>>> dev
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="confirmPdfUpload">Confirm Upload</button>
+                    {% empty %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comment-slash fa-3x mb-3 mb-custom"></i>
+                            <p>No announcements yet.</p>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
+<<<<<<< HEAD
+            <!-- Right column for student list -->
+            <div class="col-md-4">
+                <div class="card  card_custom_view">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            Students
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush" id="studentList">
+                            {% for student in group.students.all %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center student_item">
+                                    <span class="student-name">{{ student.username }}</span>
+                                    <div>
+                                        {% if request.user.is_staff %}
+                                            <form method="post"
+                                                  action="{% url 'group:remove_student' group.id student.id %}"
+                                                  style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item">No students enrolled yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+=======
             <!-- Rest of your announcements display code -->
             <div class="announcements">
                 <h3 class="mb-4">
@@ -656,12 +866,43 @@
                         <li class="list-group-item">No students enrolled yet.</li>
                         {% endfor %}
                     </ul>
+>>>>>>> dev
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<<<<<<< HEAD
+    <!-- Add Student Modal -->
+    {% if request.user.is_staff %}
+        <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
+             aria-hidden="true">
+            <input type="hidden" id="searchStudentsUrl" value="{% url 'group:search_students' group.id %}">
+            <div class="modal-dialog">
+                <div class="modal-content custom_view">
+                    <div class="modal-header header_custom">
+                        <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'group:add_students' group.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-floating mb-3 mb-custom">
+                                <select class="form-select" id="studentSelect" name="student_ids" multiple>
+                                </select>
+                            </div>
+                            <div id="selectedStudents" class="mb-3 mb-custom">
+                            </div>
+                        </div>
+                        <div class="modal-footer footer_custom">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary btn_group_custom">Add Selected Students
+                            </button>
+                        </div>
+                    </form>
+                </div>
+=======
 <!-- Add Student Modal -->
 {% if request.user.is_staff %}
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
@@ -671,6 +912,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+>>>>>>> dev
             </div>
             <form method="post" action="{% url 'group:add_students' group.id %}">
                 {% csrf_token %}
@@ -689,6 +931,85 @@
                 </div>
             </form>
         </div>
+<<<<<<< HEAD
+    {% endif %}
+
+    <!-- Add Edit Group Modal at the bottom of the file -->
+    {% if request.user.is_staff %}
+        <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content custom_view">
+                    <div class="modal-header header_custom">
+                        <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'group:edit_group' group.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3 mb-custom">
+                                <label for="group_name" class="form-label">Group Name</label>
+                                <input type="text" class="form-control control_custom" id="group_name" name="group_name"
+                                       value="{{ group.name }}" required>
+                            </div>
+                            <div class="mb-3 mb-custom">
+                                <label for="group_description" class="form-label">Group Description</label>
+                                <textarea class="form-control control_custom" id="group_description"
+                                          name="group_description" rows="3"
+                                          required>{{ group.description }}</textarea>
+                            </div>
+                            <div class="mb-3 mb-custom">
+                                <label class="form-label">Group Code</label>
+                                <p class="form-control-plaintext control_custom">{{ group.code }}</p>
+                                <small class="text-muted">Group code cannot be changed</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer footer_custom">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary btn_group_custom">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Link Modal -->
+    <div class="modal fade" id="linkModal" tabindex="-1" aria-labelledby="linkModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content custom_view">
+                <div class="modal-header header_custom">
+                    <h5 class="modal-title" id="linkModalLabel">Add Link</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 mb-custom">
+                        <label for="urlInput" class="form-label">URL</label>
+                        <input type="url" class="form-control control_custom" id="urlInput"
+                               placeholder="https://" required>
+                    </div>
+                    <div id="linkPreview" class="d-none">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img id="linkFavicon" class="favicon" width="16" height="16" alt="" src="">
+                                    <h6 id="linkTitle" class="mb-0"></h6>
+                                </div>
+                                <p id="linkDescription" class="text-muted small mt-1 mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="linkLoading" class="text-center py-3 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer footer_custom">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmLink">Add Link</button>
+                </div>
+=======
     </div>
 </div>
 
@@ -750,6 +1071,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+>>>>>>> dev
             </div>
             <form method="post" action="{% url 'group:edit_group' group.id %}">
                 {% csrf_token %}
@@ -777,8 +1099,340 @@
             </form>
         </div>
     </div>
+<<<<<<< HEAD
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pdfInput = document.getElementById('pdfInput');
+            const pdfPreview = document.getElementById('pdfPreview');
+            const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+            const confirmPdfUpload = document.getElementById('confirmPdfUpload');
+            const selectedFileName = document.getElementById('selectedFileName');
+            const modalElement = document.getElementById('pdfUploadModal');
+            let currentPreviewUrl = null;
+
+            // Initialize Bootstrap modal
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            // Function to truncate file name
+            function truncateFileName(fileName, maxLength = 7) {
+                const extension = fileName.substring(fileName.lastIndexOf('.'));
+                const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+
+                if (nameWithoutExt.length <= maxLength) {
+                    return fileName;
+                }
+
+                return `${nameWithoutExt.substring(0, maxLength)}....${extension}`;
+            }
+
+            // Function to create file display with appropriate icon
+            function createPdfFileDisplay(file) {
+                const outerContainer = document.createElement('div');
+                outerContainer.className = 'pdf-box-container';
+
+                const fileContainer = document.createElement('div');
+                fileContainer.className = 'pdf-file-container position-relative';
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn-close pdf-remove-button position-absolute';
+                removeButton.setAttribute('aria-label', 'Remove file');
+
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'd-flex flex-column align-items-center';
+
+                const icon = document.createElement('i');
+                // Choose icon based on file type
+                const fileExtension = file.name.toLowerCase().split('.').pop();
+                if (fileExtension === 'pdf') {
+                    icon.className = 'fas fa-file-pdf pdf-icon';
+                } else {
+                    icon.className = 'fas fa-file-alt txt-icon';
+                }
+
+                const fileInfo = document.createElement('span');
+                fileInfo.className = 'pdf-filename';
+                const fileName = file.name.split('\\').pop().split('/').pop();
+                fileInfo.textContent = truncateFileName(fileName);
+                fileInfo.title = fileName;
+
+                outerContainer.file = file;
+
+                removeButton.addEventListener('click', function () {
+                    outerContainer.remove();
+                });
+
+                contentWrapper.appendChild(icon);
+                contentWrapper.appendChild(fileInfo);
+                fileContainer.appendChild(removeButton);
+                fileContainer.appendChild(contentWrapper);
+                outerContainer.appendChild(fileContainer);
+
+                return outerContainer;
+            }
+
+            // Function to preview TXT file
+            function previewTxtFile(file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // Create a pre element for text display
+                    const textPreview = document.createElement('pre');
+                    textPreview.className = 'text-preview p-3 bg-light border rounded';
+                    textPreview.style.maxHeight = '400px';
+                    textPreview.style.overflow = 'auto';
+                    textPreview.style.whiteSpace = 'pre-wrap';
+                    textPreview.style.wordWrap = 'break-word';
+                    textPreview.textContent = e.target.result;
+
+                    // Clear existing preview content
+                    pdfPreviewContainer.innerHTML = '<h6 class="mb-2">Preview:</h6>';
+                    pdfPreviewContainer.appendChild(textPreview);
+                    pdfPreviewContainer.classList.remove('d-none');
+                };
+                reader.readAsText(file);
+            }
+
+            // Handle attach button click
+            const attachPdfButton = document.querySelector('[data-bs-target="#pdfUploadModal"]');
+            if (attachPdfButton) {
+                attachPdfButton.addEventListener('click', function () {
+                    cleanupModal();
+                    pdfInput.value = '';
+                    pdfPreviewContainer.classList.add('d-none');
+                    modal.show();
+                });
+            }
+
+            pdfInput.addEventListener('change', function (e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    const validTypes = ['.pdf', '.txt'];
+                    const fileExtension = '.' + file.name.toLowerCase().split('.').pop();
+
+                    if (!validTypes.includes(fileExtension)) {
+                        this.value = '';
+                        alert('Please upload PDF or TXT files only');
+                        return;
+                    }
+
+                    if (currentPreviewUrl) {
+                        URL.revokeObjectURL(currentPreviewUrl);
+                    }
+
+                    // Handle preview based on file type
+                    if (fileExtension === '.pdf') {
+                        // Reset preview container for PDF
+                        pdfPreviewContainer.innerHTML = `
+                    <h6 class="mb-2">Preview:</h6>
+                    <div class="ratio ratio-16x9">
+                        <iframe id="pdfPreview" class="border rounded"></iframe>
+                    </div>
+                `;
+                        const pdfPreview = document.getElementById('pdfPreview');
+                        currentPreviewUrl = URL.createObjectURL(file);
+                        pdfPreview.src = currentPreviewUrl;
+                        pdfPreviewContainer.classList.remove('d-none');
+                    } else if (fileExtension === '.txt') {
+                        previewTxtFile(file);
+                    }
+                }
+            });
+
+            confirmPdfUpload.addEventListener('click', function () {
+                const files = pdfInput.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    const fileDisplay = createPdfFileDisplay(file);
+                    selectedFileName.appendChild(fileDisplay);
+                    modal.hide();
+                }
+            });
+
+            // Handle form submission
+            const announcementForm = document.getElementById('announcementForm');
+            if (announcementForm) {
+                announcementForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+
+                    const links = [];
+                    document.querySelectorAll('.link-preview-item').forEach(item => {
+                        links.push({
+                            url: item.dataset.url,
+                            title: item.dataset.title,
+                            description: item.dataset.description,
+                            favicon: item.dataset.favicon,
+                            domain: item.dataset.domain
+                        });
+                    });
+
+
+                    formData.append('links', JSON.stringify(links));
+
+                    formData.delete('pdf_file');
+
+                    const fileDisplays = selectedFileName.getElementsByClassName('pdf-box-container');
+                    Array.from(fileDisplays).forEach(display => {
+                        if (display.file) {
+                            formData.append('pdf_file', display.file);
+                        }
+                    });
+
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    const originalText = submitButton.innerHTML;
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Posting...';
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.text();
+                        })
+                        .then(() => {
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
+                        });
+                });
+            }
+
+            function cleanupModal() {
+                pdfPreviewContainer.classList.add('d-none');
+                if (currentPreviewUrl) {
+                    URL.revokeObjectURL(currentPreviewUrl);
+                    currentPreviewUrl = null;
+                }
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+                document.body.style.removeProperty('overflow');
+            }
+
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                pdfPreviewContainer.classList.add('d-none');
+                pdfInput.value = '';
+                if (currentPreviewUrl) {
+                    URL.revokeObjectURL(currentPreviewUrl);
+                    currentPreviewUrl = null;
+                }
+            });
+
+            const linkModal = new bootstrap.Modal(document.getElementById('linkModal'));
+            const urlInput = document.getElementById('urlInput');
+            const linkPreview = document.getElementById('linkPreview');
+            const linkLoading = document.getElementById('linkLoading');
+            const confirmLink = document.getElementById('confirmLink');
+
+            let debounceTimer;
+            urlInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    const url = this.value.trim();
+                    if (!url) {
+                        linkPreview.classList.add('d-none');
+                        return;
+                    }
+
+                    try {
+                        linkPreview.classList.remove('d-none');
+                        linkLoading.classList.remove('d-none');
+
+                        const response = await fetch(`{% url 'group:link_info' %}?url=${encodeURIComponent(url)}`);
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to fetch link info');
+                        }
+
+                        const data = await response.json();
+
+
+                        document.getElementById('linkTitle').textContent = data.title || url;
+                        document.getElementById('linkDescription').textContent = data.description || '';
+                        document.getElementById('linkFavicon').src = data.favicon || '';
+
+                        linkLoading.classList.add('d-none');
+                    } catch (error) {
+                        console.error('Error fetching link info:', error);
+                        linkPreview.classList.add('d-none');
+                        linkLoading.classList.add('d-none');
+                    }
+                }, 500);
+            });
+
+            confirmLink.addEventListener('click', function () {
+                const url = urlInput.value.trim();
+                if (url) {
+                    const title = document.getElementById('linkTitle').textContent;
+                    const description = document.getElementById('linkDescription').textContent;
+                    const favicon = document.getElementById('linkFavicon').src;
+                    const domain = new URL(url).hostname;
+
+                    const linkPreviewItem = document.createElement('div');
+                    linkPreviewItem.className = 'link-preview-item mb-2 position-relative';
+                    linkPreviewItem.dataset.url = url;
+                    linkPreviewItem.dataset.title = title;
+                    linkPreviewItem.dataset.description = description;
+                    linkPreviewItem.dataset.favicon = favicon;
+                    linkPreviewItem.dataset.domain = domain;
+
+                    linkPreviewItem.innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-link" 
+                                        aria-label="Remove link"></button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="${favicon}" width="16" height="16" alt="${domain}">
+                                    <h6 class="mb-0">${title}</h6>
+                                </div>
+                                ${description ? `<p class="text-muted small mt-1 mb-0">${description}</p>` : ''}
+                                <small class="text-muted">${domain}</small>
+                            </div>
+                        </div>
+                    `;
+
+                    const removeButton = linkPreviewItem.querySelector('.remove-link');
+                    removeButton.addEventListener('click', function () {
+                        linkPreviewItem.remove();
+                    });
+
+                    const linksContainer = document.getElementById('selectedLinks');
+                    linksContainer.appendChild(linkPreviewItem);
+
+                    urlInput.value = '';
+                    linkPreview.classList.add('d-none');
+                    linkModal.hide();
+                }
+            });
+        });
+
+        const cancelButton = document.querySelector('[data-bs-dismiss="modal"]');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function () {
+                modal.hide();
+            });
+        }
+    </script>
+{% endblock %}
+=======
 </div>
 {% endif %}
 {% endblock %}
 {% block Script %}
 {% endblock %}
+>>>>>>> dev
