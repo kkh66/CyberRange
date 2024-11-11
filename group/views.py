@@ -8,7 +8,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
 import json
-from group.models import Group, GroupAnnouncement
+from group.models import Group, GroupAnnouncement, AnnouncementAttachment, AnnouncementLink
+from django.db import transaction
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 
 # Create your views here.
@@ -47,7 +51,11 @@ def create_group(request):
 @login_required
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    return render(request, 'ViewGroup.html', {'group': group})
+    announcements = group.announcements.all().order_by('-created_at')
+    return render(request, 'ViewGroup.html', {
+        'group': group,
+        'announcements': announcements
+    })
 
 
 @login_required
@@ -56,26 +64,52 @@ def create_announcement(request, group_id):
         group = get_object_or_404(Group, id=group_id)
         title = request.POST.get('title')
         announcement_text = request.POST.get('announcement')
-        attachment = request.FILES.getlist('attachment')
+        files = request.FILES.getlist('pdf_file')
+        links = json.loads(request.POST.get('links', '[]'))  # 获取链接数据
 
         if announcement_text:
-            announcement = GroupAnnouncement.objects.create(
-                group=group,
-                title=title,
-                announcement=announcement_text,
-                created_by=request.user
-            )
+            with transaction.atomic():
+                announcement = GroupAnnouncement.objects.create(
+                    group=group,
+                    title=title,
+                    announcement=announcement_text,
+                    created_by=request.user
+                )
 
-            for file in attachment:
-                if file.content_type in ['application/pdf', 'text/plain']:
-                    announcement.attachment.add(file)
-                else:
-                    messages.error(request, 'Only PDF and TXT files are allowed.')
+                # 处理文件上传
+                for file in files:
+                    file_extension = os.path.splitext(file.name)[1].lower()
+                    if file_extension == '.pdf' and file.content_type == 'application/pdf':
+                        AnnouncementAttachment.objects.create(
+                            announcement=announcement,
+                            pdf_file=file
+                        )
+                    elif file_extension == '.txt' and file.content_type == 'text/plain':
+                        AnnouncementAttachment.objects.create(
+                            announcement=announcement,
+                            pdf_file=file
+                        )
+                    else:
+                        messages.error(request, 'Only PDF and TXT files are allowed.')
+                        announcement.delete()
+                        return redirect('group:group_detail', group_id=group_id)
 
-            announcement.save()
+                for link_data in links:
+                    AnnouncementLink.objects.create(
+                        announcement=announcement,
+                        url=link_data['url'],
+                        title=link_data['title'],
+                        description=link_data.get('description', ''),
+                        favicon=link_data.get('favicon', ''),
+                        domain=link_data['domain']
+                    )
+
             messages.success(request, 'Announcement posted successfully.')
+        else:
+            messages.error(request, 'Please provide an announcement text.')
 
     return redirect('group:group_detail', group_id=group_id)
+
 
 @user_passes_test(lambda u: u.is_staff)
 def add_students(request, group_id):
@@ -179,3 +213,81 @@ def search_students(request, group_id):
             'more': False
         }
     })
+
+
+def get_link_info(request):
+    url = request.GET.get('url')
+    if not url:
+        return JsonResponse({'error': 'URL is required'}, status=400)
+    
+    try:
+        # 发送请求获取页面内容
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        response.raise_for_status()
+        
+        # 解析HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # 获取网站信息
+        og_title = soup.find('meta', property='og:title')
+        twitter_title = soup.find('meta', property='twitter:title')
+        
+        title = ''
+        if og_title and og_title.get('content'):
+            title = og_title.get('content')
+        elif twitter_title and twitter_title.get('content'):
+            title = twitter_title.get('content')
+        elif soup.title:
+            title = soup.title.string
+        title = title.strip() if title else ''
+        
+        # 获取描述
+        og_desc = soup.find('meta', property='og:description')
+        twitter_desc = soup.find('meta', property='twitter:description')
+        meta_desc = soup.find('meta', {'name': 'description'})
+        
+        description = ''
+        if og_desc and og_desc.get('content'):
+            description = og_desc.get('content')
+        elif twitter_desc and twitter_desc.get('content'):
+            description = twitter_desc.get('content')
+        elif meta_desc and meta_desc.get('content'):
+            description = meta_desc.get('content')
+        description = description.strip() if description else ''
+        
+        # 获取网站域名
+        domain = urlparse(url).netloc
+        
+        # 获取favicon
+        icon = soup.find('link', rel='icon')
+        shortcut_icon = soup.find('link', rel='shortcut icon')
+        
+        favicon = ''
+        if icon and icon.get('href'):
+            favicon = icon.get('href')
+        elif shortcut_icon and shortcut_icon.get('href'):
+            favicon = shortcut_icon.get('href')
+        else:
+            favicon = f"{urlparse(url).scheme}://{domain}/favicon.ico"
+        
+        # 处理相对路径的favicon
+        if favicon and not favicon.startswith(('http://', 'https://')):
+            if favicon.startswith('//'):
+                favicon = f"https:{favicon}"
+            elif favicon.startswith('/'):
+                favicon = f"{urlparse(url).scheme}://{domain}{favicon}"
+            else:
+                favicon = f"{urlparse(url).scheme}://{domain}/{favicon}"
+        
+        return JsonResponse({
+            'title': title,
+            'description': description,
+            'domain': domain,
+            'favicon': favicon
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

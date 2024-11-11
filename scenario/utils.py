@@ -1,4 +1,5 @@
 import docker
+from docker import errors
 import random
 
 
@@ -27,27 +28,26 @@ class DockerManager:
                 return port
 
     def start_container(self, image_name, container_name):
-        try:
+        for attempt in range(2):
             try:
-                old_container = self.client.containers.get(container_name)
-                old_container.remove(force=True)
+                container = self.client.containers.get(container_name)
+                return container.id, container.ports['3000/tcp'][0]['HostPort']
             except docker.errors.NotFound:
-                pass
-
-            port = self.get_available_port()
-
-            container = self.client.containers.run(
-                image=image_name,
-                name=container_name,
-                detach=True,
-                ports={'3000/tcp': port},
-                restart_policy={"Name": "unless-stopped"}
-            )
-
-            return container.id, port
-
-        except Exception as e:
-            raise Exception(f"Failed to start container: {str(e)}")
+                try:
+                    port = self.get_available_port()
+                    container = self.client.containers.run(
+                        image=image_name,
+                        name=container_name,
+                        detach=True,
+                        ports={'3000/tcp': port},
+                        privileged=True,
+                        restart_policy={"Name": "unless-stopped"}
+                    )
+                    return container.id, port
+                except Exception as e:
+                    if attempt == 1:
+                        raise Exception(f"Failed to create container after 2 attempts: {str(e)}")
+                    continue
 
     def stop_container(self, container_id):
         try:
@@ -61,16 +61,11 @@ class DockerManager:
     def get_container_info(self, container_id):
         try:
             container = self.client.containers.get(container_id)
-
-            return {
-                'id': container.id[:12],
-                'status': container.status,
-                'name': container.name,
-                'created': container.attrs['Created'],
-                'ports': container.attrs['HostConfig']['PortBindings']
-            }
+            container_info = container.attrs
+            return container_info
         except Exception as e:
-            raise Exception(f"Failed to get container info: {str(e)}")
+            print(f"Error getting container info: {e}")
+            raise
 
     def pause_container(self, container_id):
         try:
@@ -95,3 +90,53 @@ class DockerManager:
             return True
         except Exception as e:
             raise Exception(f"Failed to restart container: {str(e)}")
+
+    def start_test_container(self, image_name, container_name, user_id):
+        """
+        启动测试容器，如果容器不存在则重新创建
+        """
+        try:
+            # 先尝试获取已存在的容器
+            try:
+                container = self.client.containers.get(container_name)
+                return container.id, container.ports['3000/tcp'][0]['HostPort']
+            except docker.errors.NotFound:
+                # 如果容器不存在，创建新容器
+                port = self.get_available_port()
+                environment = {
+                    'CONTAINER_ID': container_name,
+                    'USER_ID': str(user_id),
+                    'PYTHONUNBUFFERED': '1'
+                }
+                container = self.client.containers.run(
+                    image=image_name,
+                    name=container_name,
+                    detach=True,
+                    environment=environment,
+                    ports={'3000/tcp': port},
+                    restart_policy={"Name": "unless-stopped"}
+                )
+                return container.id, port
+
+        except Exception as e:
+            raise Exception(f"Failed to start test container: {str(e)}")
+
+    def get_container_logs(self, container_id):
+        try:
+            container = self.client.containers.get(container_id)
+            logs = container.logs(
+                stdout=True,
+                stderr=True,
+                stream=False,
+                tail=100
+            ).decode('utf-8')
+
+            # 查找特定的日志信息
+            for line in logs.split('\n'):
+                if "Command executed: chmod" in line:
+                    return "Command executed: chmod"
+
+            return "No chmod command detected"
+
+        except Exception as e:
+            raise Exception(f"Failed to get container logs: {str(e)}")
