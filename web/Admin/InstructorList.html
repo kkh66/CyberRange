@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% block title %}
+    Instructor List
+{% endblock %}
+{% block content %}
+    <div id="content-main">
+        <h1>Instructor List</h1>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for staff in staff_members %}
+                <tr>
+                    <td>{{ staff.username }}</td>
+                    <td>{{ staff.email }}</td>
+                    <td>{% if staff.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    <td>
+                        <a href="{% url 'account:Btn_Instructor_Status' staff.id %}"
+                           class="btn {% if staff.is_active %}btn-danger{% else %}btn-success{% endif %}"
+                           onclick="return confirm('Are you sure you want to {% if staff.is_active %}deactivate{% else %}activate{% endif %} this staff member?')">
+                            {% if staff.is_active %}Deactivate{% else %}Activate{% endif %}
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">{% trans 'No staff members found.' %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

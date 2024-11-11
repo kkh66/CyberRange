@@ -1,0 +1,165 @@
+.scenario_card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s;
+    background: white;
+    overflow: hidden;
+}
+
+.scenario_header {
+    background: linear-gradient(135deg, #0061f2 0%, #6e00ff 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.tips_card {
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+}
+
+.tip_item {
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.tip_item:hover {
+    background: rgba(110, 0, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.scenario_back_btn {
+    text-decoration: none;
+    color: var(--bs-body-color);
+    padding-left: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.scenario_icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    margin-right: 1rem;
+}
+
+.scenario_status_box {
+    background-color: var(--bs-light);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.scenario_btn {
+    padding: 0.375rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 2rem;
+    border: 1px solid;
+    background: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+}
+
+.scenario_access_btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    background-color: var(--bs-primary);
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.scenario_access_btn:hover {
+    transform: translateY(-1px);
+    background-color: #0043a8;
+    color: white;
+}
+
+.scenario_btn_warning {
+    color: var(--bs-warning);
+    border-color: var(--bs-warning);
+}
+
+.scenario_btn_success {
+    color: var(--bs-success);
+    border-color: var(--bs-success);
+}
+
+.scenario_btn_primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.scenario_btn_danger {
+    color: var(--bs-danger);
+    border-color: var(--bs-danger);
+}
+
+.scenario_btn:hover {
+    transform: translateY(-1px);
+    color: white;
+}
+
+.scenario_btn_warning:hover {
+    background-color: var(--bs-warning);
+}
+
+.scenario_btn_success:hover {
+    background-color: var(--bs-success);
+}
+
+.scenario_btn_primary:hover {
+    background-color: var(--bs-primary);
+}
+
+.scenario_btn_danger:hover {
+    background-color: var(--bs-danger);
+}
+
+.scenario_progress_card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background: white;
+    overflow: hidden;
+}
+
+.scenario_progress_badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    background-color: var(--bs-primary);
+    color: white;
+    border-radius: 0.5rem;
+}
+
+.scenario_progress_bar_container {
+    height: 8px;
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.scenario_progress_bar {
+    height: 100%;
+    background-color: var(--bs-primary);
+    transition: width 0.3s ease;
+}
+
+.scenario_step_display {
+    padding: 1rem;
+    background-color: var(--bs-light);
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--bs-primary);
+}
