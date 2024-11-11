@@ -77,6 +77,9 @@
 
     .pdf-box-container {
         display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        /* This adds spacing between PDF boxes */
     }
 
     .pdf-box {
@@ -91,6 +94,8 @@
         justify-content: center;
         padding: 8px;
         transition: all 0.2s ease;
+        margin: 0;
+        /* Remove any default margins */
     }
 
     .pdf-box-link {
@@ -132,6 +137,16 @@
         align-items: center;
         justify-content: center;
         padding: 8px;
+        margin: 0;
+        /* Remove any default margins */
+    }
+
+    #selectedFileName {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        /* Consistent spacing with the attachment display */
+        margin-top: 0.5rem;
     }
 
     .mb-3.d-flex {
@@ -139,37 +154,8 @@
         flex-wrap: wrap;
     }
 
-    #filePreview {
-        width: 100%;
-        height: 100%;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-
-    #filePreviewContainer {
-        margin-top: 1rem;
-    }
-
-    #filePreviewContainer iframe {
-        width: 100%;
-        height: 500px;
-        /* Increased height for better visibility */
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-
-    .ratio-16x9 {
-        height: 500px;
-        /* Fixed height */
-        position: relative;
-    }
-
-    .ratio-16x9 iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .mb-3.d-flex.align-items-center.gap-2 {
+        margin-bottom: 1.5rem !important;
     }
 
     /* Preview container in modal */
@@ -244,52 +230,33 @@
         background-color: rgba(0, 0, 0, 0.2);
     }
 
-    .d-flex.gap-2 {
-        gap: 0.5rem !important;
+    .txt-icon {
+        font-size: 32px;
+        color: #0d6efd;
+        margin-bottom: 8px;
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const fileInput = document.getElementById('fileInput');
-        const filePreview = document.getElementById('filePreview');
-        const filePreviewContainer = document.getElementById('filePreviewContainer');
-        const confirmUpload = document.getElementById('confirmPdfUpload');
-        const hiddenInput = document.getElementById('attachment');
+        const pdfInput = document.getElementById('pdfInput');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+        const confirmPdfUpload = document.getElementById('confirmPdfUpload');
         const selectedFileName = document.getElementById('selectedFileName');
         const modalElement = document.getElementById('pdfUploadModal');
         let currentPreviewUrl = null;
-        const modal = new bootstrap.Modal(document.getElementById('pdfUploadModal'));
 
         // Initialize Bootstrap modal
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
 
-        function getFileIcon(fileType) {
-            return fileType === 'pdf' ? 'fa-file-pdf' : 'fa-file-text';
-        }
-
-        function getFileColor(fileType) {
-            return fileType === 'pdf' ? '#dc3545' : '#0d6efd';
-        }
-
-        function createFilesContainer() {
-            const container = document.createElement('div');
-            container.className = 'd-flex flex-wrap gap-2';
-            return container;
-        }
-
-        // Function to create file display
-        function createFileDisplay(file) {
-            const fileType = file.name.split('.').pop().toLowerCase();
-
-            // Validate file type
-            if (!['pdf', 'txt'].includes(fileType)) {
-                alert('Only PDF and TXT files are allowed');
-                return null;
-            }
-
+        // Function to create file display with appropriate icon
+        function createPdfFileDisplay(file) {
             const outerContainer = document.createElement('div');
             outerContainer.className = 'pdf-box-container';
-            outerContainer.dataset.fileName = file.name; // Store filename for reference
 
             const fileContainer = document.createElement('div');
             fileContainer.className = 'pdf-file-container position-relative';
@@ -303,25 +270,22 @@
             contentWrapper.className = 'd-flex flex-column align-items-center';
 
             const icon = document.createElement('i');
-            icon.className = `fas ${getFileIcon(fileType)} pdf-icon`;
-            icon.style.color = getFileColor(fileType);
+            // Choose icon based on file type
+            const fileExtension = file.name.toLowerCase().split('.').pop();
+            if (fileExtension === 'pdf') {
+                icon.className = 'fas fa-file-pdf pdf-icon';
+            } else {
+                icon.className = 'fas fa-file-alt txt-icon';
+            }
 
             const fileInfo = document.createElement('span');
             fileInfo.className = 'pdf-filename';
             const fileName = file.name.split('\\').pop().split('/').pop();
-            fileInfo.textContent = fileName.substring(0, fileName.lastIndexOf('.'));
+            fileInfo.textContent = fileName;
 
-            // Add remove functionality
+            outerContainer.file = file;
+
             removeButton.addEventListener('click', function () {
-                // Remove file from hidden input
-                const dt = new DataTransfer();
-                const { files } = hiddenInput;
-                for (let i = 0; i < files.length; i++) {
-                    if (files[i].name !== file.name) {
-                        dt.items.add(files[i]);
-                    }
-                }
-                hiddenInput.files = dt.files;
                 outerContainer.remove();
             });
 
@@ -334,149 +298,89 @@
             return outerContainer;
         }
 
-        // Handle attach file button click
-        const attachButton = document.querySelector('[data-bs-target="#pdfUploadModal"]');
-        if (attachButton) {
-            attachButton.addEventListener('click', function () {
-                fileInput.value = '';
-                const previewContainer = document.getElementById('filePreviewContainer');
-                if (previewContainer) {
-                    previewContainer.classList.add('d-none');
-                }
+        // Function to preview TXT file
+        function previewTxtFile(file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Create a pre element for text display
+                const textPreview = document.createElement('pre');
+                textPreview.className = 'text-preview p-3 bg-light border rounded';
+                textPreview.style.maxHeight = '400px';
+                textPreview.style.overflow = 'auto';
+                textPreview.style.whiteSpace = 'pre-wrap';
+                textPreview.style.wordWrap = 'break-word';
+                textPreview.textContent = e.target.result;
+
+                // Clear existing preview content
+                pdfPreviewContainer.innerHTML = '<h6 class="mb-2">Preview:</h6>';
+                pdfPreviewContainer.appendChild(textPreview);
+                pdfPreviewContainer.classList.remove('d-none');
+            };
+            reader.readAsText(file);
+        }
+
+        // Handle attach button click
+        const attachPdfButton = document.querySelector('[data-bs-target="#pdfUploadModal"]');
+        if (attachPdfButton) {
+            attachPdfButton.addEventListener('click', function () {
+                cleanupModal();
+                pdfInput.value = '';
+                pdfPreviewContainer.innerHTML = `
+                <h6 class="mb-2">Preview:</h6>
+                <div class="ratio ratio-16x9">
+                    <iframe id="pdfPreview" class="border rounded"></iframe>
+                </div>
+            `;
+                pdfPreviewContainer.classList.add('d-none');
                 modal.show();
             });
         }
 
-        fileInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            const pdfPreview = document.getElementById('pdfPreview');
-            const textPreview = document.getElementById('textPreview');
-            const filePreviewContainer = document.getElementById('filePreviewContainer');
+        pdfInput.addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                const file = files[0];
+                const validTypes = ['.pdf', '.txt'];
+                const fileExtension = '.' + file.name.toLowerCase().split('.').pop();
 
-            // Hide both preview containers initially
-            pdfPreview.style.display = 'none';
-            textPreview.style.display = 'none';
-
-            if (file) {
-                const fileType = file.name.split('.').pop().toLowerCase();
-
-                // Validate file type
-                if (!['pdf', 'txt'].includes(fileType)) {
-                    alert('Only PDF and TXT files are allowed');
+                if (!validTypes.includes(fileExtension)) {
                     this.value = '';
+                    alert('Please upload PDF or TXT files only');
                     return;
                 }
 
-                // Clear previous preview URL
                 if (currentPreviewUrl) {
                     URL.revokeObjectURL(currentPreviewUrl);
-                    currentPreviewUrl = null;
                 }
 
-                // Show the preview container
-                filePreviewContainer.classList.remove('d-none');
-
-                if (fileType === 'pdf') {
+                // Handle preview based on file type
+                if (fileExtension === '.pdf') {
+                    // Reset preview container for PDF
+                    pdfPreviewContainer.innerHTML = `
+                    <h6 class="mb-2">Preview:</h6>
+                    <div class="ratio ratio-16x9">
+                        <iframe id="pdfPreview" class="border rounded"></iframe>
+                    </div>
+                `;
+                    const pdfPreview = document.getElementById('pdfPreview');
                     currentPreviewUrl = URL.createObjectURL(file);
-                    pdfPreview.querySelector('iframe').src = currentPreviewUrl;
-                    pdfPreview.style.display = 'block';
-                } else if (fileType === 'txt') {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        textPreview.innerHTML = `<pre style="margin: 0; white-space: pre-wrap;">${e.target.result}</pre>`;
-                        textPreview.style.display = 'block';
-                    };
-                    reader.readAsText(file);
+                    pdfPreview.src = currentPreviewUrl;
+                    pdfPreviewContainer.classList.remove('d-none');
+                } else if (fileExtension === '.txt') {
+                    previewTxtFile(file);
                 }
-
-                // Show upload progress
-                const progressContainer = document.createElement('div');
-                progressContainer.className = 'progress mt-2';
-                progressContainer.innerHTML = '<div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>';
-                this.parentElement.appendChild(progressContainer);
-
-                setTimeout(() => {
-                    progressContainer.remove();
-                }, 1500);
-            } else {
-                // Hide preview if no file selected
-                filePreviewContainer.classList.add('d-none');
             }
         });
 
-        confirmUpload.addEventListener('click', function () {
-            const files = fileInput.files;
+        confirmPdfUpload.addEventListener('click', function () {
+            const files = pdfInput.files;
             if (files.length > 0) {
-                const dataTransfer = new DataTransfer();
-
-                // Add new files to existing ones
-                const existingFiles = Array.from(hiddenInput.files || []);
-                existingFiles.forEach(file => dataTransfer.items.add(file));
-                Array.from(files).forEach(file => dataTransfer.items.add(file));
-
-                hiddenInput.files = dataTransfer.files;
-
-                // Create or get files container
-                let filesContainer = selectedFileName.nextElementSibling;
-                if (!filesContainer || !filesContainer.classList.contains('d-flex')) {
-                    filesContainer = createFilesContainer();
-                    selectedFileName.parentElement.appendChild(filesContainer);
-                }
-
-                // Add new file displays
-                Array.from(files).forEach(file => {
-                    const fileDisplay = createFileDisplay(file);
-                    if (fileDisplay) {
-                        filesContainer.appendChild(fileDisplay);
-                    }
-                });
-
+                const file = files[0];
+                const fileDisplay = createPdfFileDisplay(file);
+                selectedFileName.appendChild(fileDisplay);
                 modal.hide();
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) backdrop.remove();
-                document.body.classList.remove('modal-open');
-                document.body.style.removeProperty('padding-right');
-                document.body.style.removeProperty('overflow');
-                fileInput.value = '';
             }
         });
-
-        function cleanupModal() {
-            const pdfPreview = document.getElementById('pdfPreview');
-            const textPreview = document.getElementById('textPreview');
-            const filePreviewContainer = document.getElementById('filePreviewContainer');
-
-            // Reset preview states
-            if (filePreviewContainer) filePreviewContainer.classList.add('d-none');
-            if (pdfPreview) {
-                pdfPreview.style.display = 'none';
-                const iframe = pdfPreview.querySelector('iframe');
-                if (iframe) iframe.src = '';
-            }
-            if (textPreview) {
-                textPreview.style.display = 'none';
-                textPreview.innerHTML = '';
-            }
-            if (fileInput) fileInput.value = '';
-
-            // Clear preview URL
-            if (currentPreviewUrl) {
-                URL.revokeObjectURL(currentPreviewUrl);
-                currentPreviewUrl = null;
-            }
-
-
-            // Cleanup modal backdrop and body
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.parentNode.removeChild(backdrop);
-            }
-
-            // Reset body styles
-            document.body.classList.remove('modal-open');
-            document.body.style.removeProperty('padding-right');
-            document.body.style.removeProperty('overflow');
-        }
 
         // Handle form submission
         const announcementForm = document.getElementById('announcementForm');
@@ -485,6 +389,17 @@
                 e.preventDefault();
 
                 const formData = new FormData(this);
+
+                // Clear any existing pdf_file entries
+                formData.delete('pdf_file');
+
+                // Add all PDF files from the selected files display
+                const fileDisplays = selectedFileName.getElementsByClassName('pdf-box-container');
+                Array.from(fileDisplays).forEach(display => {
+                    if (display.file) {
+                        formData.append('pdf_file', display.file);
+                    }
+                });
 
                 const submitButton = this.querySelector('button[type="submit"]');
                 const originalText = submitButton.innerHTML;
@@ -511,8 +426,12 @@
             });
         }
 
-        // Clean up when modal is hidden
-        modalElement.addEventListener('hidden.bs.modal', function () {
+        function cleanupModal() {
+            pdfPreviewContainer.classList.add('d-none');
+            if (currentPreviewUrl) {
+                URL.revokeObjectURL(currentPreviewUrl);
+                currentPreviewUrl = null;
+            }
             const backdrop = document.querySelector('.modal-backdrop');
             if (backdrop) {
                 backdrop.remove();
@@ -520,15 +439,24 @@
             document.body.classList.remove('modal-open');
             document.body.style.removeProperty('padding-right');
             document.body.style.removeProperty('overflow');
+        }
 
-            // Reset form
-            fileInput.value = '';
-            const previewContainer = document.getElementById('filePreviewContainer');
-            if (previewContainer) {
-                previewContainer.classList.add('d-none');
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            pdfPreviewContainer.classList.add('d-none');
+            pdfInput.value = '';
+            if (currentPreviewUrl) {
+                URL.revokeObjectURL(currentPreviewUrl);
+                currentPreviewUrl = null;
             }
         });
     });
+
+    const cancelButton = document.querySelector('[data-bs-dismiss="modal"]');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function () {
+            modal.hide();
+        });
+    }
 </script>
 {% endblock %}
 {% block content %}
@@ -613,11 +541,12 @@
                         <div class="mb-3 d-flex align-items-center gap-2">
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#pdfUploadModal">
-                                <i class="fas fa-paperclip me-2"></i>Attach file(s)
+                                <i class="fas fa-file me-2"></i>Attach File
                             </button>
                             <span id="selectedFileName" class="text-muted"></span>
                         </div>
-                        <input type="file" id="attachment" name="attachment" accept=".pdf,.txt" class="d-none" multiple>
+                        <input type="file" id="pdf_file" name="pdf_file" accept=".pdf, .txt"
+                            title="Please select PDF files only" class="d-none" multiple>
                         <button type="submit" class="btn btn-primary btn_group_custom">Post Announcement</button>
                     </form>
                 </div>
@@ -635,16 +564,13 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="fileInput" class="form-label">Select File (PDF or TXT only)</label>
-                                <input type="file" class="form-control" id="fileInput" accept=".pdf,.txt">
+                                <label for="pdfInput" class="form-label">Select PDF or TXT File</label>
+                                <input type="file" class="form-control" id="pdfInput" accept=".pdf,.txt">
                             </div>
-                            <div id="filePreviewContainer" class="d-none">
+                            <div id="pdfPreviewContainer" class="d-none">
                                 <h6 class="mb-2">Preview:</h6>
-                                <div id="pdfPreview" class="ratio ratio-16x9" style="display: none;">
-                                    <iframe class="border rounded"></iframe>
-                                </div>
-                                <div id="textPreview" class="border rounded p-3 bg-light"
-                                    style="display: none; height: 500px; overflow-y: auto;">
+                                <div class="ratio ratio-16x9">
+                                    <iframe id="pdfPreview" class="border rounded"></iframe>
                                 </div>
                             </div>
                         </div>
@@ -656,38 +582,40 @@
                 </div>
             </div>
 
-            <!-- Announcements section - Move this OUTSIDE the modal -->
+            <!-- Rest of your announcements display code -->
             <div class="announcements">
                 <h3 class="mb-4">
                     <i class="fas fa-scroll me-2"></i>
                     Announcements
                 </h3>
-                {% for announcement in group.announcements.all %}
-                <div class="card announcement_card">
+                {% for announcement in announcements %}
+                <div class="card announcement_card mb-3">
                     <div class="card-body">
                         {% if announcement.title %}
                         <h5 class="card-title">{{ announcement.title }}</h5>
                         {% endif %}
                         <p class="card-text">{{ announcement.announcement }}</p>
-                        {% if announcement.attachment %}
+                        {% if announcement.attachments.exists %}
                         <div class="pdf-box-container mt-2">
-                            <a href="{{ announcement.attachment.url }}" class="pdf-box-link" target="_blank">
+                            {% for attachment in announcement.attachments.all %}
+                            <a href="{{ attachment.pdf_file.url }}" class="pdf-box-link" target="_blank">
                                 <div class="pdf-box">
-                                    {% with filename=announcement.attachment.name %}
-                                    {% if '.pdf' in filename %}
-                                    <i class="fas fa-file-pdf pdf-icon" style="color: #dc3545;"></i>
+                                    {% if '.pdf' in attachment.pdf_file.name|lower %}
+                                    <i class="fas fa-file-pdf pdf-icon"></i>
                                     {% else %}
-                                    <i class="fas fa-file-text pdf-icon" style="color: #0d6efd;"></i>
+                                    <i class="fas fa-file-alt txt-icon"></i>
                                     {% endif %}
-                                    <span class="pdf-filename">{{
-                                        filename|cut:"announcements/"|cut:"files/"|cut:".pdf"|cut:".txt" }}</span>
-                                    {% endwith %}
+                                    <span class="pdf-filename">{{ attachment.filename }}</span>
                                 </div>
                             </a>
+                            {% endfor %}
                         </div>
                         {% endif %}
-                        <p class="card-text">
-                            <small class="text-muted">Posted by {{ announcement.created_by.username }}</small>
+                        <p class="card-text mt-3">
+                            <small class="text-muted">
+                                Posted by {{ announcement.created_by.username }} at {{ announcement.created_at|time:"g:i A" }} on November 11, 2024
+                            </small>
+                            </small>
                         </p>
                     </div>
                 </div>
@@ -698,159 +626,159 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
 
-            <!-- Right column for student list -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>
-                            Students
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush" id="studentList">
-                            {% for student in group.students.all %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center student_item">
-                                <span class="student-name">{{ student.username }}</span>
-                                <div>
-                                    {% if request.user.is_staff %}
-                                    <form method="post" action="{% url 'group:remove_student' group.id student.id %}"
-                                        style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                            </li>
-                            {% empty %}
-                            <li class="list-group-item">No students enrolled yet.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+        <!-- Right column for student list -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Students
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush" id="studentList">
+                        {% for student in group.students.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center student_item">
+                            <span class="student-name">{{ student.username }}</span>
+                            <div>
+                                {% if request.user.is_staff %}
+                                <form method="post" action="{% url 'group:remove_student' group.id student.id %}"
+                                    style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No students enrolled yet.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Add Student Modal -->
-    {% if request.user.is_staff %}
-    <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
-        aria-hidden="true">
-        <input type="hidden" id="searchStudentsUrl" value="{% url 'group:search_students' group.id %}">
-        <div class="modal-dialog  modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="post" action="{% url 'group:add_students' group.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="form-floating mb-3">
-                            <select class="form-select" id="studentSelect" name="student_ids" multiple>
-                            </select>
-                        </div>
-                        <div id="selectedStudents" class="mb-3">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary btn_group_custom">Add Selected Students
-                        </button>
-                    </div>
-                </form>
+<!-- Add Student Modal -->
+{% if request.user.is_staff %}
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <input type="hidden" id="searchStudentsUrl" value="{% url 'group:search_students' group.id %}">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form method="post" action="{% url 'group:add_students' group.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="studentSelect" name="student_ids" multiple>
+                        </select>
+                    </div>
+                    <div id="selectedStudents" class="mb-3">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary btn_group_custom">Add Selected Students
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
 
 
-    <style>
-        .select2-container--bootstrap-5 .select2-selection {
-            border: 1px solid #dee2e6;
-            padding: 0.375rem 0.75rem;
-            height: auto;
-            min-height: calc(3.5rem + 2px);
-            background-color: #fff;
-            border-radius: 0.375rem;
-        }
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1px solid #dee2e6;
+        padding: 0.375rem 0.75rem;
+        height: auto;
+        min-height: calc(3.5rem + 2px);
+        background-color: #fff;
+        border-radius: 0.375rem;
+    }
 
-        .select2-container--bootstrap-5 .select2-selection--multiple {
-            padding-top: 1.625rem;
-        }
+    .select2-container--bootstrap-5 .select2-selection--multiple {
+        padding-top: 1.625rem;
+    }
 
-        .select2-container--bootstrap-5 .select2-selection__rendered {
-            padding: 0;
-        }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding: 0;
+    }
 
-        .select2-container--bootstrap-5 .select2-selection__choice {
-            background-color: #e9ecef;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            margin-right: 0.375rem;
-        }
+    .select2-container--bootstrap-5 .select2-selection__choice {
+        background-color: #e9ecef;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.375rem;
+    }
 
-        .select2-container--bootstrap-5 .select2-search__field {
-            margin-top: 0.375rem;
-        }
+    .select2-container--bootstrap-5 .select2-search__field {
+        margin-top: 0.375rem;
+    }
 
-        .select2-container--bootstrap-5 .select2-dropdown {
-            border-color: #dee2e6;
-            border-radius: 0.375rem;
-        }
+    .select2-container--bootstrap-5 .select2-dropdown {
+        border-color: #dee2e6;
+        border-radius: 0.375rem;
+    }
 
-        .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background-color: #0d6efd;
-            color: #fff;
-        }
+    .select2-container--bootstrap-5 .select2-results__option--highlighted {
+        background-color: #0d6efd;
+        color: #fff;
+    }
 
-        .form-floating>.select2-container {
-            padding-top: 1.625rem;
-        }
-    </style>
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
-    {% endif %}
+    .form-floating>.select2-container {
+        padding-top: 1.625rem;
+    }
+</style>
+<link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+{% endif %}
 
-    <!-- Add Edit Group Modal at the bottom of the file -->
-    {% if request.user.is_staff %}
-    <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="post" action="{% url 'group:edit_group' group.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="group_name" class="form-label">Group Name</label>
-                            <input type="text" class="form-control" id="group_name" name="group_name"
-                                value="{{ group.name }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="group_description" class="form-label">Group Description</label>
-                            <textarea class="form-control" id="group_description" name="group_description" rows="3"
-                                required>{{ group.description }}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Group Code</label>
-                            <p class="form-control-plaintext">{{ group.code }}</p>
-                            <small class="text-muted">Group code cannot be changed</small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn_group_custom">Save Changes</button>
-                    </div>
-                </form>
+<!-- Add Edit Group Modal at the bottom of the file -->
+{% if request.user.is_staff %}
+<div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form method="post" action="{% url 'group:edit_group' group.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="group_name" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="group_name" name="group_name"
+                            value="{{ group.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="group_description" class="form-label">Group Description</label>
+                        <textarea class="form-control" id="group_description" name="group_description" rows="3"
+                            required>{{ group.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Group Code</label>
+                        <p class="form-control-plaintext">{{ group.code }}</p>
+                        <small class="text-muted">Group code cannot be changed</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn_group_custom">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
-    {% endif %}
-    {% endblock %}
-    {% block Script %}
-    {% endblock %}
+</div>
+{% endif %}
+{% endblock %}
+{% block Script %}
+{% endblock %}
