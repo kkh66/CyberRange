@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.group_list, name='group_list'),
     path('create/', views.create_group, name='create_group'),
     path('add/', views.add_group, name='add_group'),
+    path('link-info/', views.get_link_info, name='link_info'),
 
     path('<int:group_id>/', include([
         path('', views.group_detail, name='group_detail'),
@@ -18,7 +19,6 @@ urlpatterns = [
         path('students/<int:student_id>/remove/', views.remove_student, name='remove_student'),
         path('search-students/', views.search_students, name='search_students'),
         
-
 
     ])),
 

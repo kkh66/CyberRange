@@ -10,7 +10,7 @@
             <div class="col-lg-10">
                 <!-- Back Button -->
                 <div class="mb-4">
-                    <a href="{% url 'scenario:scenario_list' group.id %}" 
+                    <a href="{% url 'scenario:scenario_list' group.id %}"
                        class="scenario_back_btn">
                         <i class="fas fa-chevron-left me-2"></i>Back to Scenarios
                     </a>
@@ -31,10 +31,21 @@
 
                         {% if user_scenario %}
                             <!-- Container Status -->
-                            <div class="scenario_status_box">
+                            <div class="scenario_status_box" data-time-limit="{{ scenario.time_limit }}">
+                                <!-- Timer and Status -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Elapsed Time</h6>
+                                    <div class="scenario_timer" id="elapsedTime">00:00:00</div>
+                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="mb-0">Container Status</h6>
-                                    <div id="containerStatus" >Loading...</div>
+                                    <div id="containerStatus">Loading...</div>
+                                </div>
+
+                                <!-- Hidden start time for JavaScript -->
+                                <div class="d-none">
+                                    <span id="startTime">{{ user_scenario.created_at|date:"c" }}</span>
                                 </div>
 
                                 <!-- Container Control Buttons -->
@@ -95,7 +106,8 @@
                                     <span class="scenario_progress_badge" id="progressText">Loading...</span>
                                 </div>
                                 <div class="scenario_progress_bar_container">
-                                    <div class="scenario_progress_bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                                    <div class="scenario_progress_bar" id="progressBar" role="progressbar"
+                                         style="width: 0%"></div>
                                 </div>
                             </div>
 

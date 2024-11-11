@@ -2,12 +2,10 @@ from django.urls import path, include
 from . import views
 
 app_name = 'account'
-
 urlpatterns = [
     # Basic function
     path('', views.login, name='login'),
     path('register/', views.register, name='register'),
-    path('console', views.console, name='console'),
     path('active/', views.activate_user, name='activate_user'),
     path('confirm-pin/', views.confirm_pin, name='confirm_pin'),
     path('forget_password', views.request_password_reset, name='forget_password'),

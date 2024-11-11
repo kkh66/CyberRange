@@ -32,10 +32,18 @@ class GroupAnnouncement(models.Model):
     def __str__(self):
         return f"{self.title or 'Announcement'} - {self.announcement[:50]}..."
 
+<<<<<<< HEAD
+
+class AnnouncementAttachment(models.Model):
+    announcement = models.ForeignKey(GroupAnnouncement, on_delete=models.CASCADE, related_name='attachments')
+    pdf_file = models.FileField(upload_to='announcements/pdfs/')
+    file_type = models.CharField(max_length=10, blank=True)
+=======
 class AnnouncementAttachment(models.Model):
     announcement = models.ForeignKey(GroupAnnouncement, on_delete=models.CASCADE, related_name='attachments')
     pdf_file = models.FileField(upload_to='announcements/pdfs/')
     file_type = models.CharField(max_length=10, blank=True) 
+>>>>>>> dev
 
     def save(self, *args, **kwargs):
         # Set file type on save
@@ -45,4 +53,22 @@ class AnnouncementAttachment(models.Model):
 
     def filename(self):
         return os.path.basename(self.pdf_file.name)
+<<<<<<< HEAD
 
+
+class AnnouncementLink(models.Model):
+    announcement = models.ForeignKey(GroupAnnouncement, on_delete=models.CASCADE, related_name='links')
+    url = models.URLField(max_length=500)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    favicon = models.URLField(max_length=500, blank=True)
+    domain = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+=======
+>>>>>>> dev
+
+    def __str__(self):
+        return f"{self.title} ({self.domain})"
+
+    class Meta:
+        ordering = ['-created_at']

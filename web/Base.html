@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <title>{% block title %}
     {% endblock %}</title>
-
-
     <style>
         #alert-container {
             position: fixed;
@@ -25,34 +23,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
     {% block styles %}
     {% endblock %}
-
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 
-    <!-- jQuery first -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- Then Popper.js -->
+    <!-- Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 
-    <!-- Then Bootstrap JS -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Then Select2 JS -->
+    <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
+<<<<<<< HEAD
+<body class="sb-nav-fixed sb-sidenav-toggled bg-light">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+
+=======
 <body class="sb-nav-fixed sb-sidenav-toggled bg-light-black">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+>>>>>>> dev
     {% if user.is_authenticated %}
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0 ms-1" id="sidebarToggle" href="#!"><i
                 class="fas fa-bars"></i></button>
+<<<<<<< HEAD
+    {% endif %}
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" href="{% url 'scenario:console' %}">
+        <img src="{% static 'TARUMT-logo.png' %}" alt="TAR UMT Logo">
+        Cyber Range</a>
+    {% if user.is_authenticated %}
+
+
+=======
                 {% endif %}
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="{% url 'account:console' %}">
         <img src="{% static 'Images/TARUMT-logo.png' %}" alt="TAR UMT Logo">
         Cyber Range</a>
     {% if user.is_authenticated %}
+>>>>>>> dev
         <!-- Navbar Search-->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <div class="input-group">
@@ -89,7 +105,7 @@
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="{% url 'account:console' %}">
+                        <a class="nav-link" href="{% url 'scenario:console' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -119,19 +135,6 @@
                             <div class="collapse" id="collapseInstructors" aria-labelledby="headingTwo"
                                  data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
-                                       data-bs-target="#pagesCollapseScenario" aria-expanded="false"
-                                       aria-controls="pagesCollapseScenario">
-                                        Scenario Management
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseScenario" aria-labelledby="headingOne"
-                                         data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-
-                                            <a class="nav-link" href="{% url 'scenario:list_all_scenarios' %}">Manage Scenario</a>
-                                        </nav>
-                                    </div>
                                     <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
                                        data-bs-target="#pagesCollapseGroup" aria-expanded="false"
                                        aria-controls="pagesCollapseGroup">
