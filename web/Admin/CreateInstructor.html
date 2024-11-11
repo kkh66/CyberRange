@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Add Instructor
+{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+{% block content %}
+    {% if user.is_superuser %}
+        <form method="POST" action="{% url 'account:register_Instructor' %}">
+            {% csrf_token %}
+            <div class="d-flex login_use ">
+                <div class="container align-content-center justify-content-center">
+                    <div class="shadow card">
+                        <div class="card-body">
+                            <div class="form-floating mb-3">
+                                <div class="card-title"><h1>Add Instructor Page</h1></div>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisterUsername" name="staff_username" type="text" class="form-control"
+                                       placeholder="Username" required="">
+                                <label for="RegisterUsername">Username</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisterPassword" name="staff_password" type="password" class="form-control"
+                                       placeholder="Password"
+                                       required="">
+                                <label for="RegisterPassword">Password</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisterConfirmPassword" name="staff_confirm_password" type="password"
+                                       class="form-control"
+                                       placeholder="Confirm Password"
+                                       required="">
+                                <label for="RegisterConfirmPassword">Confirm Password</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisterEmail" name="staff_email" class="form-control" placeholder="Email"
+                                       type="email"
+                                       required="">
+                                <label for="RegisterEmail">Email</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisterFirst" name="staff_first_name" class="form-control
+" placeholder="First name" type="text" required="">
+                                <label for="RegisterFirst">First Name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input id="RegisteredLast" name="staff_last_name" class="form-control"
+                                       placeholder="Last name"
+                                       type="text" required="">
+                                <label for="RegisteredLast">Last Name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="submit" value="Submit" class="btn btn-primary"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}
