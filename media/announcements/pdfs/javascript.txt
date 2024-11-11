@@ -1,0 +1,159 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const pdfInput = document.getElementById('pdfInput');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+        const confirmPdfUpload = document.getElementById('confirmPdfUpload');
+        const hiddenPdfInput = document.getElementById('pdf_file');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const modalElement = document.getElementById('pdfUploadModal');
+        let currentPreviewUrl = null;
+
+        // Initialize Bootstrap modal
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        // Function to create PDF preview element
+        function createPdfPreview(file) {
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'pdf-preview-container d-flex align-items-center gap-2 mt-2 border rounded p-2';
+
+            // Create PDF icon and filename
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'd-flex align-items-center gap-2';
+            fileInfo.innerHTML = `
+            <i class="fas fa-file-pdf text-danger"></i>
+            <span class="text-truncate" style="max-width: 200px;">${file.name}</span>
+        `;
+
+            // Create small PDF preview
+            const preview = document.createElement('div');
+            preview.className = 'pdf-preview-small';
+            preview.style.cssText = 'width: 100px; height: 60px; overflow: hidden; border: 1px solid #dee2e6;';
+
+            const iframe = document.createElement('iframe');
+            iframe.src = URL.createObjectURL(file);
+            iframe.style.cssText = 'width: 100%; height: 100%; border: none; transform: scale(0.5); transform-origin: 0 0;';
+
+            preview.appendChild(iframe);
+            previewContainer.appendChild(fileInfo);
+            previewContainer.appendChild(preview);
+
+            return previewContainer;
+        }
+
+        pdfInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (currentPreviewUrl) {
+                    URL.revokeObjectURL(currentPreviewUrl);
+                }
+                currentPreviewUrl = URL.createObjectURL(file);
+                pdfPreview.src = currentPreviewUrl;
+                pdfPreviewContainer.classList.remove('d-none');
+
+                // Show upload progress
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'progress mt-2';
+                progressContainer.innerHTML = '<div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>';
+                pdfPreviewContainer.appendChild(progressContainer);
+
+                // Simulate progress (remove this in production and use actual upload progress)
+                setTimeout(() => {
+                    progressContainer.remove();
+                }, 1500);
+            }
+        });
+
+        confirmPdfUpload.addEventListener('click', function () {
+            const file = pdfInput.files[0];
+            if (file) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                hiddenPdfInput.files = dataTransfer.files;
+
+                // Update the UI with PDF preview
+                const existingPreview = selectedFileName.nextElementSibling;
+                if (existingPreview && existingPreview.classList.contains('pdf-preview-container')) {
+                    existingPreview.remove();
+                }
+                selectedFileName.textContent = file.name;
+                selectedFileName.parentElement.appendChild(createPdfPreview(file));
+
+                modal.hide();
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+                document.body.style.removeProperty('overflow');
+            }
+        });
+
+        // Modify the announcement form submit handler to maintain previews
+        const announcementForm = document.getElementById('announcementForm');
+        if (announcementForm) {
+            announcementForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+
+                // Show submission progress
+                const submitButton = this.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Posting...';
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.text();
+                    })
+                    .then(() => {
+                        location.reload(); // Reload to show new announcement with preview
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    });
+            });
+        }
+
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            if (!hiddenPdfInput.files.length) {
+                pdfPreviewContainer.classList.add('d-none');
+                pdfInput.value = '';
+                pdfPreview.src = '';
+                selectedFileName.textContent = '';
+            }
+
+            if (currentPreviewUrl) {
+                URL.revokeObjectURL(currentPreviewUrl);
+                currentPreviewUrl = null;
+            }
+
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            document.body.style.removeProperty('overflow');
+        });
+
+        const cancelButton = document.querySelector('[data-bs-dismiss="modal"]');
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function () {
+                modal.hide();
+            });
+        }
+    });
+</script>

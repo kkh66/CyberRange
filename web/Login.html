@@ -14,12 +14,18 @@
                 <div class="shadow card">
                     <div class="card-body">
                         <div class="card-title"><h1>Login</h1></div>
-                        <div class="form-floating mb-3">
+                        <div class="form-floating form_login mb-3">
+                            <span class="login-icon">
+                                <img src="{% static 'Images/Login-Username.png' %}" alt="Username Icon">
+                            </span>
                             <input id="LoginUsername" name="username" type="text" class="form-control"
                                    placeholder="Username" required="">
                             <label for="LoginUsername">Username</label>
                         </div>
-                        <div class="form-floating mb-3">
+                        <div class="form-floating form_login mb-3">
+                            <span class="login-icon">
+                                <img src="{% static 'Images/Login-Password.png' %}" alt="Username Icon">
+                            </span>
                             <input id="LoginPassword" name="password" type="password" class="form-control"
                                    placeholder="Password" required="">
                             <label for="LoginPassword">Password</label>

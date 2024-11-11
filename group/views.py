@@ -8,7 +8,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
 import json
-from group.models import Group, GroupAnnouncement
+from group.models import Group, GroupAnnouncement, AnnouncementAttachment
+from django.db import transaction
 
 
 # Create your views here.
@@ -47,7 +48,11 @@ def create_group(request):
 @login_required
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    return render(request, 'ViewGroup.html', {'group': group})
+    announcements = group.announcements.all().order_by('-created_at')
+    return render(request, 'ViewGroup.html', {
+        'group': group,
+        'announcements': announcements
+    })
 
 
 @login_required
@@ -56,24 +61,40 @@ def create_announcement(request, group_id):
         group = get_object_or_404(Group, id=group_id)
         title = request.POST.get('title')
         announcement_text = request.POST.get('announcement')
-        attachment = request.FILES.getlist('attachment')
+        files = request.FILES.getlist('pdf_file')
 
         if announcement_text:
-            announcement = GroupAnnouncement.objects.create(
-                group=group,
-                title=title,
-                announcement=announcement_text,
-                created_by=request.user
-            )
-
-            for file in attachment:
-                if file.content_type in ['application/pdf', 'text/plain']:
-                    announcement.attachment.add(file)
-                else:
-                    messages.error(request, 'Only PDF and TXT files are allowed.')
-
-            announcement.save()
+            with transaction.atomic():
+                announcement = GroupAnnouncement.objects.create(
+                    group=group,
+                    title=title,
+                    announcement=announcement_text,
+                    created_by=request.user
+                )
+                
+                for file in files:
+                    # Get file extension
+                    file_extension = os.path.splitext(file.name)[1].lower()
+                    
+                    # Check if file type is allowed
+                    if file_extension == '.pdf' and file.content_type == 'application/pdf':
+                        AnnouncementAttachment.objects.create(
+                            announcement=announcement,
+                            pdf_file=file
+                        )
+                    elif file_extension == '.txt' and file.content_type == 'text/plain':
+                        AnnouncementAttachment.objects.create(
+                            announcement=announcement,
+                            pdf_file=file
+                        )
+                    else:
+                        messages.error(request, 'Only PDF and TXT files are allowed.')
+                        announcement.delete()
+                        return redirect('group:group_detail', group_id=group_id)
+                        
             messages.success(request, 'Announcement posted successfully.')
+        else:
+            messages.error(request, 'Please provide an announcement text.')
 
     return redirect('group:group_detail', group_id=group_id)
 

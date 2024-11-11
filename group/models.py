@@ -1,16 +1,8 @@
 import os
 from django.contrib.auth.models import User
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from CyberRange.utils import generate_classcode
-
-
-def validate_file_extension(value):
-    ext = os.path.splitext(value.name)[1]  # Get the file extension
-    valid_extensions = ['.pdf', '.txt']
-    if not ext.lower() in valid_extensions:
-        raise ValidationError('Only PDF and TXT files are allowed.')
 
 
 # Create your models here.
@@ -36,19 +28,21 @@ class GroupAnnouncement(models.Model):
     announcement = models.TextField()
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_announcements')
     created_at = models.DateTimeField(auto_now_add=True)
-    attachment = models.FileField(upload_to='announcements/attachment/', null=True, blank=True, max_length=255)
 
     def __str__(self):
         return f"{self.title or 'Announcement'} - {self.announcement[:50]}..."
-    
+
+class AnnouncementAttachment(models.Model):
+    announcement = models.ForeignKey(GroupAnnouncement, on_delete=models.CASCADE, related_name='attachments')
+    pdf_file = models.FileField(upload_to='announcements/pdfs/')
+    file_type = models.CharField(max_length=10, blank=True) 
+
+    def save(self, *args, **kwargs):
+        # Set file type on save
+        file_extension = os.path.splitext(self.pdf_file.name)[1].lower()
+        self.file_type = file_extension
+        super().save(*args, **kwargs)
+
     def filename(self):
-        return os.path.basename(self.attachment.name) if self.attachment else None
-
-    def get_file_type(self):
-        if self.attachment:
-            ext = os.path.splitext(self.attachment.name)[1].lower()
-            return ext[1:]  # Remove the dot
-        return None
-
-
+        return os.path.basename(self.pdf_file.name)
 

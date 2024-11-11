@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os 
 from pathlib import Path
 
 from django.contrib import messages
@@ -79,9 +79,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'FYP',
-        'USER': 'FYPProject',
-        'PASSWORD': 'konghang9',
-        'HOST': '192.168.0.120',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -148,3 +148,6 @@ EMAIL_HOST_USER = 'rssvdbr@gmail.com'
 EMAIL_HOST_PASSWORD = 'bmmigytuztjogwcy'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'rssvdbr@gmail.com'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

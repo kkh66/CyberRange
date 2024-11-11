@@ -41,15 +41,18 @@
     <!-- Then Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
-<body class="sb-nav-fixed sb-sidenav-toggled">
+<body class="sb-nav-fixed sb-sidenav-toggled bg-light-black">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="{% url 'account:console' %}">TARUMT Cyber Range</a>
     {% if user.is_authenticated %}
         <!-- Sidebar Toggle-->
-        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0 ms-1" id="sidebarToggle" href="#!"><i
                 class="fas fa-bars"></i></button>
-
+                {% endif %}
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" href="{% url 'account:console' %}">
+        <img src="{% static 'Images/TARUMT-logo.png' %}" alt="TAR UMT Logo">
+        Cyber Range</a>
+    {% if user.is_authenticated %}
         <!-- Navbar Search-->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <div class="input-group">
@@ -197,10 +200,10 @@
                 {% endblock %}
             </div>
         </main>
-        <footer class="py-4 bg-light mt-auto">
+        <footer class="py-4 bg-dark mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; TARUMT Cyber Range 2024</div>
+                    <div class="text-muted ">Copyright &copy; TARUMT Cyber Range 2024</div>
                     <div>
                         <a href="#">Privacy Policy</a>
                         &middot;
