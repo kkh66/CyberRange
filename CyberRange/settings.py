@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 from django.contrib import messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-n)+c4wuwma&2*^^j==qulxit0au&fgz8oc$!@xzifd!gm+q+()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.120']
 
 # Application definition
 
@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "account.apps.AccountConfig",
     "scenario.apps.ScenarioConfig",
-    "group.apps.GroupConfig"
+    "group.apps.GroupConfig",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'CyberRange.urls'
@@ -118,6 +120,9 @@ USE_I18N = True
 
 USE_TZ = True
 
+# URL title fetch timeout in seconds
+URL_FETCH_TIMEOUT = 5
+
 # For the Message Use
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -131,6 +136,7 @@ MESSAGE_TAGS = {
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -148,3 +154,24 @@ EMAIL_HOST_USER = 'rssvdbr@gmail.com'
 EMAIL_HOST_PASSWORD = 'bmmigytuztjogwcy'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'rssvdbr@gmail.com'
+
+# URL fetch settings
+URL_FETCH_MAX_LENGTH = 200
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Django-axes settings
+AXES_FAILURE_LIMIT = 3
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_COOLOFF_TIME = 24  # Hours
+AXES_LOCKOUT_TEMPLATE = None
+AXES_LOCKOUT_URL = None
+AXES_RESET_ON_SUCCESS = True
+
+
+AUTHENTICATION_BACKENDS = [
+    'account.views.CustomAxesBackend',  # Our custom backend
+    'django.contrib.auth.backends.ModelBackend',
+]
+
