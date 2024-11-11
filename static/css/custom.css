@@ -1,0 +1,131 @@
+.login_use {
+    height: 100vh;
+}
+
+.login_use .container {
+    padding-left: 400px;
+}
+
+.login_use .card {
+    width: 400px;
+}
+
+.login_use .btn {
+    border-radius: 15px;
+    width: 200px;
+    margin-left: 70px;
+}
+
+.card-fp {
+    width: 200px;
+}
+
+.group_custom_card {
+    height: 250px !important;
+    border-radius: 25px !important;
+}
+
+.group_custom_card h1 {
+    font-size: 80px !important;
+}
+
+.group_custom_card .card-text {
+    font-size: 50px;
+    color: gray;
+}
+
+.btn_custom {
+    background-color: #1a1e21 !important;
+}
+
+.card_custom {
+    border-radius: 25px !important;
+}
+
+#classCode {
+    margin: 0;
+    padding: 0;
+}
+
+.text-muted {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.tooltip {
+    font-size: 14px;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #333;
+    padding: 6px 12px;
+}
+
+.icon-group {
+    display: flex;
+    align-items: center;
+}
+
+.btn_icon {
+    padding: 2px 6px !important;
+    line-height: 1;
+    border: none;
+    background: transparent;
+}
+
+.form-floating {
+    position: relative;
+}
+
+.form-floating input{
+    padding-left: 30px;
+    width: 100%; 
+}
+
+.form-floating.form_login {
+    position: relative;
+}
+
+.form-floating.form_login label{
+    margin-top: -12px; 
+    transform:translateY(0) !important;
+    transition: opacity 0.6s ease;
+    opacity: 0.9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-floating.form_login:focus-within label {
+    color: rgb(0, 0, 0) !important;
+    opacity: 1 !important;
+    font-weight: bold;
+}
+
+.form-floating.form_login:focus-within .login-icon img {
+    opacity: 1;
+    filter: brightness(0) saturate(100%) invert(36%) sepia(89%) saturate(250%) hue-rotate(200deg) brightness(95%) contrast(85%);
+}
+
+.form-floating.form_login input{
+    padding-left: 30px;
+    width: 100%; 
+}
+
+.login-icon {
+    position: absolute;
+    top: 63%;
+    left: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.login-icon img {
+    height: 16px;
+    width: 16px;
+    opacity: 0.6;
+    transition: opacity 0.5s ease;
+    filter:none;
+}
+
+.form_login .form-control {
+    padding-left: 40px; 
+}

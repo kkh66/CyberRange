@@ -1,0 +1,33 @@
+Proposal 
+
+problem - LMS problem, authentication & authorization issues in RBAC, UI problem (not intuitive etc) evaluate 
+
+original proposal challenges can be added in chapter 6
+
+problem & solution in cyber range LMS should change  (original can be in chapter 3, chapter 4, chapter 5) 
+solution is it using MFA or etc , proposed language
+
+
+change term study group with training activity 
+
+5/7 meeting
+
+
+
+waterfall approach
+use case diagram
+what module u have
+Flow chart of web
+Functional & non-functional requirements
+usability (UI)
+security (what you use)
+
+19/7 meeting
+
+
+Change title and other relevant parts
+Need to have editor to link the sequence of scenario to intro
+Basically a function to add in instructions for each scenario steps
+- what are the data to save in the system
+Scenario Step or Instruction Editor
+

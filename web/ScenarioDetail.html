@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Scenario Detail{% endblock %}
+{% block styles %}
+    <link href="{% static 'css/scenario.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Back Button -->
+                <div class="mb-4">
+                    <a href="{% url 'scenario:scenario_list' group.id %}" 
+                       class="scenario_back_btn">
+                        <i class="fas fa-chevron-left me-2"></i>Back to Scenarios
+                    </a>
+                </div>
+
+                <!-- Scenario Header -->
+                <div class="scenario_card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="scenario_icon">
+                                <i class="fas fa-laptop-code text-primary"></i>
+                            </div>
+                            <div>
+                                <h2 class="h4 mb-1">{{ scenario.name }}</h2>
+                                <p class="text-muted mb-0 small">{{ scenario.description }}</p>
+                            </div>
+                        </div>
+
+                        {% if user_scenario %}
+                            <!-- Container Status -->
+                            <div class="scenario_status_box">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">Container Status</h6>
+                                    <div id="containerStatus" >Loading...</div>
+                                </div>
+
+                                <!-- Container Control Buttons -->
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <form method="post" action="{% url 'scenario:container_action' scenario.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="pause">
+                                        <button type="submit" class="scenario_btn scenario_btn_warning">
+                                            <i class="fas fa-pause me-2"></i>Pause
+                                        </button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'scenario:container_action' scenario.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="unpause">
+                                        <button type="submit" class="scenario_btn scenario_btn_success">
+                                            <i class="fas fa-play me-2"></i>Resume
+                                        </button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'scenario:container_action' scenario.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="restart">
+                                        <button type="submit" class="scenario_btn scenario_btn_primary">
+                                            <i class="fas fa-sync me-2"></i>Restart
+                                        </button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'scenario:container_action' scenario.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="stop">
+                                        <button type="submit" class="scenario_btn scenario_btn_danger">
+                                            <i class="fas fa-stop me-2"></i>Stop
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Access Link -->
+                                <div class="mt-4">
+                                    <a href="http://{{ request.get_host|cut:':8000' }}:{{ user_scenario.port }}"
+                                       target="_blank"
+                                       class="scenario_access_btn">
+                                        <i class="fas fa-external-link-alt me-2"></i>Access Scenario
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                {% if user_scenario %}
+                    <div id="stepProgress" class="scenario_progress_card">
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Progress</h6>
+                                    <span class="scenario_progress_badge" id="progressText">Loading...</span>
+                                </div>
+                                <div class="scenario_progress_bar_container">
+                                    <div class="scenario_progress_bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Step Content -->
+                            <div class="mt-4">
+                                <h5 class="mb-3">Current Step</h5>
+                                <div id="stepDisplay" class="scenario_step_display">
+                                    Loading step information...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if user_scenario %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                initScenarioDetail(
+                    '{{ scenario.id }}',
+                    '{% url "scenario:check_progress" scenario.id %}',
+                    '{% url "scenario:container_info" scenario.id %}'
+                );
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'js/scripts.js' %}"></script>
+{% endblock %}
