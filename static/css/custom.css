@@ -1,157 +1,236 @@
-.login_use {
-    height: 100vh;
-}
 
-.login_use .container {
-    padding-left: 400px;
-}
 
-.login_use .card {
-    width: 400px;
-}
-
-.login_use .btn {
-    border-radius: 15px;
-    width: 200px;
-    margin-left: 70px;
-}
-
-.card-fp {
-    width: 200px;
-}
-
-.group_custom_card {
-    height: 250px !important;
-    border-radius: 25px !important;
-}
-
-.group_custom_card h1 {
-    font-size: 80px !important;
-}
-
-.group_custom_card .card-text {
-    font-size: 50px;
-    color: gray;
-}
-
-.btn_custom {
-    background-color: #1a1e21 !important;
-}
-
-.card_custom {
-    border-radius: 25px !important;
-}
-
-#classCode {
-    margin: 0;
-    padding: 0;
-}
-
-.text-muted {
-    display: inline-flex !important;
-    align-items: center !important;
-}
-
-.tooltip {
-    font-size: 14px;
-}
-
-.tooltip .tooltip-inner {
-    background-color: #333;
-    padding: 6px 12px;
-}
-
-.icon-group {
+/* Common Container Styles */
+.login_container,
+.forgot_password_container,
+.active_account_container {
+    min-height: 100vh;
     display: flex;
     align-items: center;
-}
-
-.btn_icon {
-    padding: 2px 6px !important;
-    line-height: 1;
-    border: none;
-    background: transparent;
-}
-
-.form-floating {
+    justify-content: center;
     position: relative;
+    margin: -1.5rem -1.5rem 0;
+    overflow: hidden;
 }
 
-<<<<<<< HEAD
-.form-floating input {
-    padding-left: 30px;
-    width: 100%;
-=======
-.form-floating input{
-    padding-left: 30px;
-    width: 100%; 
->>>>>>> dev
-}
-
-.form-floating.form_login {
-    position: relative;
-}
-
-<<<<<<< HEAD
-.form-floating.form_login label {
-    margin-top: -12px;
-    transform: translateY(0) !important;
-=======
-.form-floating.form_login label{
-    margin-top: -12px; 
-    transform:translateY(0) !important;
->>>>>>> dev
-    transition: opacity 0.6s ease;
-    opacity: 0.9;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.form-floating.form_login:focus-within label {
-    color: rgb(0, 0, 0) !important;
-    opacity: 1 !important;
-    font-weight: bold;
-}
-
-.form-floating.form_login:focus-within .login-icon img {
-    opacity: 1;
-    filter: brightness(0) saturate(100%) invert(36%) sepia(89%) saturate(250%) hue-rotate(200deg) brightness(95%) contrast(85%);
-}
-
-<<<<<<< HEAD
-.form-floating.form_login input {
-    padding-left: 30px;
-    width: 100%;
-=======
-.form-floating.form_login input{
-    padding-left: 30px;
-    width: 100%; 
->>>>>>> dev
-}
-
-.login-icon {
+/* Animated Background */
+.animated_background {
     position: absolute;
-    top: 63%;
-    left: 10px;
-    transform: translateY(-50%);
-    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1e2a3a 0%, #0f172a 100%);
+    background-size: 400% 400%;
+    animation: gradient_shift 15s ease infinite;
+    z-index: 1;
 }
 
-.login-icon img {
-    height: 16px;
-    width: 16px;
-    opacity: 0.6;
-    transition: opacity 0.5s ease;
-<<<<<<< HEAD
-    filter: none;
+/* Common Card Styles */
+.login_card,
+.register_card,
+.forgot_password_card,
+.active_account_card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    z-index: 2;
+    animation: card_float 0.8s ease-out;
+    margin: 2rem 1rem;
 }
 
-.form_login .form-control {
+.register_card {
+    max-width: 500px;
+}
+
+/* Common Header Styles */
+.login_header,
+.register_header,
+.forgot_password_header,
+.active_account_header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+.login_header h1,
+.register_header h1,
+.forgot_password_title,
+.active_account_title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Icon Circle Style */
+.forgot_password_icon,
+.active_account_icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: icon_pulse 2s infinite;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Form Styles */
+.form-floating > .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding-left: 40px !important;
+}
+
+.form-floating > .form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.form-floating > label {
+    color: rgba(255, 255, 255, 0.7);
     padding-left: 40px;
-=======
-    filter:none;
 }
 
-.form_login .form-control {
-    padding-left: 40px; 
->>>>>>> dev
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: rgba(255, 255, 255, 0.9);
+    transform: scale(0.85) translateY(-0.75rem) translateX(0.15rem);
+}
+
+/* Form Icon Styles */
+.form_icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.form-floating:focus-within .form_icon {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Button Styles */
+.btn-custom {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Link Styles */
+.login_links,
+.register_links,
+.back_to_login {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.login_links a,
+.register_links a,
+.back_to_login a {
+    color: #5770ff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.login_links p,
+.register_links p {
+    color: white;
+}
+
+.login_links a:hover,
+.register_links a:hover,
+.back_to_login a:hover {
+    color: #3d48a8;
+}
+
+/* Animations */
+@keyframes gradient_shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes card_float {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes icon_pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .login_card,
+    .register_card,
+    .forgot_password_card,
+    .active_account_card {
+        margin: 1rem;
+        padding: 2rem;
+    }
+}
+
+/* Subtitle Styles */
+.forgot_password_subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+
+.btn-primary.w-100 {
+    width: 100%;
+}
+
+
+.form-floating.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+
+.fa-key {
+    color: #fff;
+}
+
+.fa-unlock.form_icon {
+    font-size: 0.9em;
 }

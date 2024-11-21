@@ -15,7 +15,6 @@ from .models import PasswordResetRequest, StaffActivationPin, UserActivationPin
 from django.contrib.auth.decorators import login_required, user_passes_test
 from axes.handlers.proxy import AxesProxyHandler
 from axes.backends import AxesBackend
-from axes.helpers import get_lockout_response
 
 
 # Student Functions

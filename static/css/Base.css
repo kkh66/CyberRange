@@ -1,0 +1,185 @@
+.avatar_icon {
+    position: absolute;
+    inset: 2px;
+    background: linear-gradient(45deg, #1a1a2e, #16213e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.avatar_icon i {
+    color: #98a1b1;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.modern_dropdown {
+    margin-top: 10px !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    overflow: hidden;
+    animation: dropdownFade 0.3s ease;
+}
+
+.logout_item {
+    color: #fff !important;
+    padding: 15px 20px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.logout_item i {
+    color: #e74c3c;
+    font-size: 1.1rem;
+}
+
+.logout_item:hover {
+    background: rgba(231, 76, 60, 0.1) !important;
+    color: #e74c3c !important;
+}
+
+/* User dropdown */
+.user_dropdown_toggle {
+    padding: 5px !important;
+    position: relative;
+    background: transparent;
+    border-radius: 50%;
+}
+
+.user_dropdown_toggle::after {
+    display: none;
+}
+
+/* User dropdown Hover Effects */
+.user_dropdown_toggle:hover .avatar_icon {
+    background: linear-gradient(45deg, #1f1f3a, #1a2747);
+}
+
+.user_dropdown_toggle:hover .avatar_icon i {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+/* User dropdown Active/Open State */
+.user_dropdown_toggle[aria-expanded="true"] .avatar_icon {
+    background: linear-gradient(45deg, #242447, #1e2f55);
+}
+
+.user_dropdown_toggle[aria-expanded="true"] .avatar-ring {
+    animation-play-state: paused;
+}
+
+.custom_dropdown_divider {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    margin: 0 !important;
+}
+
+.user_dropdown_header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user_email {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+}
+
+.user_info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user_details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user_avatar_large {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, #1a1a2e, #16213e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user_avatar_large i {
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+.user_name_large {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Glow Effect */
+.avatar_wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.avatar_wrapper::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: transparent;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.user_dropdown_toggle:hover .avatar_wrapper::after {
+    box-shadow: 0 0 15px rgba(15, 52, 96, 0.5);
+}
+
+.avatar_ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #0f3460, #533483) border-box;
+    animation: rotateRing 6s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rotateRing {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .modern_dropdown {
+        min-width: 220px !important;
+    }
+}
