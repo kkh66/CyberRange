@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Take Quiz{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 600px;
+            margin: 80px auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        #progress-bar {
+            height: 5px;
+            background-color: #ff4757;
+            width: 0%;
+            margin-bottom: 20px;
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        #answers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .answer-btn {
+            background-color: #3742fa;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+
+        .answer-btn:hover {
+            background-color: #5352ed;
+            transform: translateY(-2px);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .correct {
+            background-color: #2ed573 !important;
+        }
+
+        .wrong {
+            background-color: #ff6348 !important;
+        }
+
+        #next-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #next-btn:hover {
+            transform: scale(1.05);
+            background-color: #ff5e76;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="quiz-container">
+        <h2 id="question"></h2>
+        <div id="answers"></div>
+        <button id="next-btn">Next Question</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = {{ questions|safe }};
+            let currentQuestionIndex = 0;
+            let score = 0;
+
+            function updateProgressBar() {
+                const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            }
+
+            function displayQuestion() {
+                const question = questions[currentQuestionIndex];
+                const questionElement = document.getElementById('question');
+                const answersElement = document.getElementById('answers');
+                const nextButton = document.getElementById('next-btn');
+
+                questionElement.textContent = `Question ${currentQuestionIndex + 1}: ${question.question_text}`;
+                answersElement.innerHTML = '';
+                nextButton.style.display = 'none';
+
+                const options = {
+                    'A': question.option_a,
+                    'B': question.option_b,
+                    'C': question.option_c,
+                    'D': question.option_d
+                };
+
+                for (const [option, text] of Object.entries(options)) {
+                    const button = document.createElement('button');
+                    button.textContent = text;
+                    button.className = 'answer-btn';
+                    button.onclick = () => selectAnswer(option, button);
+                    answersElement.appendChild(button);
+                }
+
+                updateProgressBar();
+            }
+
+            function selectAnswer(selectedOption, selectedButton) {
+                const question = questions[currentQuestionIndex];
+                const buttons = document.querySelectorAll('.answer-btn');
+
+                buttons.forEach(button => button.disabled = true);
+
+                if (selectedOption === question.correct_option) {
+                    selectedButton.classList.add('correct');
+                    score++;
+                } else {
+                    selectedButton.classList.add('wrong');
+                    buttons.forEach(button => {
+                        if (button.textContent === question[`option_${question.correct_option.toLowerCase()}`]) {
+                            button.classList.add('correct');
+                        }
+                    });
+                }
+
+                document.getElementById('next-btn').style.display = 'inline-block';
+            }
+
+            document.getElementById('next-btn').addEventListener('click', () => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion();
+                } else {
+                    // 先显示分数
+                    Swal.fire({
+                        title: 'Quiz Completed!',
+                        text: `Your score: ${score}/${questions.length}`,
+                        icon: 'success',
+                        confirmButtonText: 'Submit',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const formData = new FormData();
+                            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                            formData.append('score', score);
+                            formData.append('total_questions', questions.length);
+                            
+                            // 提交测验结果
+                            fetch(window.location.href, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    // 显示评分或返回列表的选项
+                                    Swal.fire({
+                                        title: 'Would you like to rate this scenario?',
+                                        text: 'Your feedback helps us improve the learning experience.',
+                                        icon: 'question',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Rate Scenario',
+                                        cancelButtonText: 'Back to List',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = data.rate_url;
+                                        } else {
+                                            window.location.href = data.list_url;
+                                        }
+                                    });
+                                } else {
+                                    throw new Error(data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Something went wrong. Please try again.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Start the quiz
+            displayQuestion();
+        });
+    </script>
+{% endblock %}
