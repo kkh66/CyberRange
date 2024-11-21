@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "scenario.apps.ScenarioConfig",
     "group.apps.GroupConfig",
     "axes",
+    "quiz.apps.QuizConfig"
 ]
 
 MIDDLEWARE = [
@@ -83,7 +84,7 @@ DATABASES = {
         'NAME': 'FYP',
         'USER': 'FYPProject',
         'PASSWORD': 'konghang9',
-        'HOST': '192.168.0.120',
+        'HOST': '192.168.1.120',
         'PORT': '3306',
     }
 }
@@ -169,9 +170,7 @@ AXES_LOCKOUT_TEMPLATE = None
 AXES_LOCKOUT_URL = None
 AXES_RESET_ON_SUCCESS = True
 
-
 AUTHENTICATION_BACKENDS = [
-    'account.views.CustomAxesBackend',  # Our custom backend
+    'account.views.CustomAxesBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-

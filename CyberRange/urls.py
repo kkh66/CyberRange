@@ -22,6 +22,7 @@ urlpatterns = [
     path('', include('account.urls', namespace='account')),
     path('groups/', include('group.urls', namespace='group')),
     path('scenario/', include('scenario.urls', namespace='scenario')),
+    path('quiz/', include('quiz.urls', namespace='quiz')),
 ]
 
 if settings.DEBUG:

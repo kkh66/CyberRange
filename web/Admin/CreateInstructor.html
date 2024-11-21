@@ -3,62 +3,236 @@
 {% block title %}
     Add Instructor
 {% endblock %}
-{% block style %}
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% block styles %}
+    <style>
+        :root {
+            --primary-dark: #1a237e;
+            --secondary-dark: #d84315;
+            --accent-dark: #2c387e;
+            --dark-orange: #bf360c;
+            --glass-bg: rgba(33, 33, 33, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.2);
+        }
+
+        .instructor_container {
+            min-height: calc(100vh - 56px);
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark), var(--accent-dark));
+            background-size: 300% 300%;
+            animation: gradientAnimation 15s ease infinite;
+            position: relative;
+            margin: -1.5rem -1.5rem 0;
+        }
+
+        .Custom_card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: fadeIn 0.5s ease-out;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard_header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dashboard_title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dashboard_title i {
+            font-size: 2rem;
+            background: linear-gradient(45deg, var(--secondary-dark), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-floating {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            background: var(--input-bg) !important;
+            border: 2px solid var(--input-border) !important;
+            color: white !important;
+            height: 60px !important;
+            padding-left: 3rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        .form-floating label {
+            color: rgba(255, 255, 255, 0.7) !important;
+            padding-left: 3rem !important;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transform: scale(0.85) translateY(-0.75rem) translateX(0.15rem);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 2;
+        }
+
+        .btn_submit {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn_submit:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn_submit:active {
+            transform: translateY(0);
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Error state styling */
+        .form-control.is-invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+    </style>
 {% endblock %}
+
 {% block content %}
     {% if user.is_superuser %}
-        <form method="POST" action="{% url 'account:register_Instructor' %}">
-            {% csrf_token %}
-            <div class="d-flex login_use ">
-                <div class="container align-content-center justify-content-center">
-                    <div class="shadow card">
-                        <div class="card-body">
-                            <div class="form-floating mb-3">
-                                <div class="card-title"><h1>Add Instructor Page</h1></div>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisterUsername" name="staff_username" type="text" class="form-control"
-                                       placeholder="Username" required="">
-                                <label for="RegisterUsername">Username</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisterPassword" name="staff_password" type="password" class="form-control"
-                                       placeholder="Password"
-                                       required="">
-                                <label for="RegisterPassword">Password</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisterConfirmPassword" name="staff_confirm_password" type="password"
-                                       class="form-control"
-                                       placeholder="Confirm Password"
-                                       required="">
-                                <label for="RegisterConfirmPassword">Confirm Password</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisterEmail" name="staff_email" class="form-control" placeholder="Email"
-                                       type="email"
-                                       required="">
-                                <label for="RegisterEmail">Email</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisterFirst" name="staff_first_name" class="form-control
-" placeholder="First name" type="text" required="">
-                                <label for="RegisterFirst">First Name</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input id="RegisteredLast" name="staff_last_name" class="form-control"
-                                       placeholder="Last name"
-                                       type="text" required="">
-                                <label for="RegisteredLast">Last Name</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input type="submit" value="Submit" class="btn btn-primary"/>
-                            </div>
-                        </div>
-                    </div>
+        <div class="instructor_container">
+            <div class="Custom_card">
+                <div class="dashboard_header">
+                    <h1 class="dashboard_title">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Add Instructor
+                    </h1>
                 </div>
+
+                <form method="POST" action="{% url 'account:register_Instructor' %}">
+                    {% csrf_token %}
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-user input-icon"></i>
+                        <input id="RegisterUsername" name="staff_username" type="text" class="form-control"
+                               placeholder="Username" required="">
+                        <label for="RegisterUsername">Username</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input id="RegisterPassword" name="staff_password" type="password" class="form-control"
+                               placeholder="Password" required="">
+                        <label for="RegisterPassword">Password</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input id="RegisterConfirmPassword" name="staff_confirm_password" type="password"
+                               class="form-control" placeholder="Confirm Password" required="">
+                        <label for="RegisterConfirmPassword">Confirm Password</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input id="RegisterEmail" name="staff_email" class="form-control"
+                               placeholder="Email" type="email" required="">
+                        <label for="RegisterEmail">Email</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-user-circle input-icon"></i>
+                        <input id="RegisterFirst" name="staff_first_name" class="form-control"
+                               placeholder="First name" type="text" required="">
+                        <label for="RegisterFirst">First Name</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <i class="fas fa-user-circle input-icon"></i>
+                        <input id="RegisteredLast" name="staff_last_name" class="form-control"
+                               placeholder="Last name" type="text" required="">
+                        <label for="RegisteredLast">Last Name</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <button type="submit" class="btn btn-primary btn_submit">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Add Instructor
+                        </button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     {% endif %}
 {% endblock %}

@@ -1,0 +1,72 @@
+const {app, BrowserWindow, dialog, session} = require('electron');
+
+let mainWindow;
+
+async function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 1600,
+        height: 1000,
+        title: 'Cyber Range',
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
+
+    await mainWindow.loadURL('http://localhost:8000/');
+
+    mainWindow.on('close', async (e) => {
+        e.preventDefault();
+
+        const {response} = await dialog.showMessageBox({
+            type: 'question',
+            title: 'Confirm Exit',
+            message: 'Are you sure you want to exit?',
+            buttons: ['Yes', 'No'],
+            defaultId: 1,
+            cancelId: 1,
+            noLink: true,
+            normalizeAccessKeys: true
+        });
+
+        if (response === 1) {
+            e.preventDefault();
+        } else {
+            try {
+                await session.defaultSession.clearCache();
+
+                await session.defaultSession.clearStorageData({
+                    storages: [
+                        'cookies',
+                        'localStorage',
+                        'sessionStorage',
+                    ]
+                });
+
+                mainWindow = null;
+                app.exit();
+            } catch (error) {
+                dialog.showErrorBox('Error', `Failed to clear session: ${error.message}`);
+                mainWindow = null;
+                app.exit();
+            }
+        }
+    });
+
+    mainWindow.webContents.on('did-fail-load', () => {
+        dialog.showErrorBox('Connection Error',
+            'Failed to connect to Django server. Please ensure the server is running on port 8000.');
+        mainWindow = null;
+        app.quit();
+    });
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+    app.quit();
+});
+
+process.on('uncaughtException', (error) => {
+    dialog.showErrorBox('Error', `An unexpected error occurred: ${error.message}`);
+});

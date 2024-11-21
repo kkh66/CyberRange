@@ -37,13 +37,31 @@ def create_group(request):
         name = request.POST.get('group_name')
         description = request.POST.get('group_description')
 
-        if name and description:
-            Group.objects.create(
-                name=name,
-                description=description,
-                staff=request.user
-            )
+        if not name:
+            messages.error(request, 'Group name is required.')
             return redirect('group:group_list')
+        elif len(name) > 100:
+            messages.error(request, 'Group name is too long.')
+            return redirect('group:group_list')
+
+        if not description:
+            messages.error(request, 'Description is required.')
+            return redirect('group:group_list')
+        elif len(description) > 500:
+            messages.error(request, 'Description is too long.')
+            return redirect('group:group_list')
+
+        if Group.objects.filter(name=name).exists():
+            messages.error(request, 'A group with this name already exists.')
+            return redirect('group:group_list')
+
+        Group.objects.create(
+            name=name,
+            description=description,
+            staff=request.user
+        )
+        messages.success(request, 'Group created successfully!')
+        return redirect('group:group_list')
 
     return redirect('group:group_list')
 
@@ -76,7 +94,6 @@ def create_announcement(request, group_id):
                     created_by=request.user
                 )
 
-                # 处理文件上传
                 for file in files:
                     file_extension = os.path.splitext(file.name)[1].lower()
                     if file_extension == '.pdf' and file.content_type == 'application/pdf':

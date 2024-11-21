@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quiz List{% endblock %}
+
+{% block styles %}
+    <style>
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 70px;
+        }
+
+        /* Flexbox layout for header */
+        .container .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: #6964f0;
+            font-weight: 600;
+        }
+
+        /* Create Quiz Button */
+        .create-quiz-btn {
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .create-quiz-btn:hover {
+            background-color: #e05647;
+            transform: translateY(-3px);
+        }
+
+        /* Quiz List Styles */
+        #quiz-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .quiz-item {
+            background: #e1f7d5;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quiz-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .quiz-info {
+            flex-grow: 1;
+        }
+
+        .quiz-title {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .quiz-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .create-quiz-btn {
+                padding: 10px 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .create-quiz-btn {
+                padding: 8px 16px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="header">
+            <h2>Available Quizzes</h2>
+            {% if user.is_staff %}
+                <a href="" class="create-quiz-btn">
+                    <i class="fas fa-plus"></i> Create Quiz
+                </a>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <ul id="quiz-list">
+            {% if quizzes %}
+                {% for quiz in quizzes %}
+                    <li class="quiz-item" onclick="window.location.href='{% url 'quiz:TakeQuiz' quiz.id %}'">
+                        <div class="quiz-info">
+                            <h3 class="quiz-title">{{ quiz.title }}</h3>
+                            <div class="quiz-meta">
+                            </div>
+                        </div>
+                        {% if user == quiz.user %}
+                            <div class="quiz-actions">
+                                <button onclick="event.stopPropagation(); deleteQuiz({{ quiz.id }})"
+                                        class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="quiz-item" style="text-align: center; cursor: default;">
+                    <p>No quizzes available yet.</p>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+
+{% endblock %}
