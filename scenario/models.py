@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from .utils import DockerManager
+from django.core.validators import MinValueValidator
 
 
 # Create your models here.
@@ -10,25 +11,13 @@ class Scenario(models.Model):
     description = models.TextField()
     docker_name = models.CharField(max_length=255)
     time_limit = models.IntegerField(
-        default=60,  # Default 60 minutes
-        help_text="Time limit in minutes"
+        default=60,
+        validators=[
+            MinValueValidator(1, message="The minimum time limit is 1 minute.")]
     )
 
     def __str__(self):
         return self.name
-
-
-class Step(models.Model):
-    scenario = models.ForeignKey(Scenario, related_name='steps', on_delete=models.CASCADE)
-    step_content = models.TextField()
-    order = models.IntegerField(default=0)
-    is_expert = models.BooleanField(default=False, verbose_name='Expert Content')
-
-    class Meta:
-        ordering = ['order']
-
-    def __str__(self):
-        return f"Step {self.order + 1}: {self.step_content}"
 
 
 class UserScenario(models.Model):
@@ -36,27 +25,38 @@ class UserScenario(models.Model):
     scenario = models.ForeignKey(Scenario, related_name='user_scenarios', on_delete=models.CASCADE)
     container_id = models.CharField(max_length=255, null=True, blank=True)
     port = models.IntegerField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    time_exceeded = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
-
-    @property
-    def time_remaining(self):
-        if not self.created_at:
-            return 0
-        
-        elapsed = timezone.now() - self.created_at
-        limit = timezone.timedelta(minutes=self.scenario.time_limit)
-        remaining = limit - elapsed
-        
-        return max(0, remaining.total_seconds() / 60)
+    difficulty_level = models.CharField(
+        max_length=20,
+        choices=[
+            ('beginner', 'Beginner'),
+            ('expert', 'Expert')
+        ],
+        null=True,
+        blank=True
+    )
 
     @property
     def is_time_exceeded(self):
-        return self.time_remaining <= 0
+        if not self.container_id:
+            return False
 
-    def __str__(self):
-        return f"{self.user.username} - {self.scenario.name}"
+        try:
+            docker_manager = DockerManager()
+            container_info = docker_manager.get_container_logs(self.container_id)
+            start_time = container_info.get('StartedAt')
+            if not start_time:
+                return False
+
+            start_time = timezone.datetime.strptime(
+                start_time.split('.')[0],
+                '%Y-%m-%dT%H:%M:%S'
+            ).replace(tzinfo=timezone.utc)
+
+            elapsed = timezone.now() - start_time
+            return elapsed.total_seconds() / 60 > self.scenario.time_limit
+        except Exception:
+            return False
 
     def clean_up(self):
         if self.container_id:
@@ -70,27 +70,8 @@ class UserScenario(models.Model):
         self.clean_up()
         super().delete(*args, **kwargs)
 
-
-class UserStep(models.Model):
-    user_scenario = models.ForeignKey(UserScenario, related_name='user_steps', on_delete=models.CASCADE)
-    step = models.ForeignKey(Step, related_name='user_steps', on_delete=models.CASCADE)
-    step_done = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['step__order']
-
     def __str__(self):
-        return f"{self.user_scenario.user.username} - Step {self.step.order + 1}"
-
-    @property
-    def is_current_step(self):
-        previous_steps = UserStep.objects.filter(
-            user_scenario=self.user_scenario,
-            step__order__lt=self.step.order
-        )
-        return (not self.step_done and
-                (previous_steps.count() == 0 or
-                 previous_steps.filter(step_done=True).count() == previous_steps.count()))
+        return f"{self.user.username} - {self.scenario.name}"
 
 
 class GroupScenario(models.Model):
@@ -117,24 +98,6 @@ class ScenarioRating(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.scenario.name} - {self.rating} stars"
-
-    @property
-    def stars_display(self):
-        return '★' * self.rating + '☆' * (5 - self.rating)
-
-
-class StepRating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    step = models.ForeignKey(Step, related_name='ratings', on_delete=models.CASCADE)
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'step')
-
-    def __str__(self):
-        return f"{self.user.username} - Step {self.step.order + 1} - {self.rating} stars"
 
     @property
     def stars_display(self):

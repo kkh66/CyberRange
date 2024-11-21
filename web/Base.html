@@ -19,11 +19,14 @@
         }
     </style>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+    <link href="{% static 'css/Base.css' %}" rel="stylesheet">
     {% block styles %}
     {% endblock %}
+    <!--- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
+    <!--- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
@@ -39,6 +42,7 @@
 
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body class="sb-nav-fixed sb-sidenav-toggled bg-light">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -57,29 +61,41 @@
 
         <!-- Navbar Search-->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-            <div class="input-group">
-                <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
-                       aria-describedby="btnNavbarSearch"/>
-                <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i>
-                </button>
-            </div>
         </form>
         {% block class_use %}
         {% endblock %}
         <!-- Navbar-->
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
-                   aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#!">Settings</a></li>
-                    <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                    <li>
-                        <hr class="dropdown-divider"/>
-                    </li>
-                    <li><a class="dropdown-item" href="{% url 'account:logout' %}">Logout
-                    </a></li>
-                </ul>
+                <a class="nav-link dropdown-toggle user_dropdown_toggle" id="navbarDropdown" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="user_avatar">
+                        <div class="avatar_wrapper">
+                            <div class="avatar_icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="avatar_ring"></div>
+                        </div>
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end modern_dropdown" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-header user_dropdown_header">
+                        <div class="user_info">
+                            <div class="user_avatar_large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user_details">
+                                <span class="user_name_large">{{ user.username }}</span>
+                                <span class="user_email">{{ user.email }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider custom_dropdown_divider"></div>
+                    <a class="dropdown-item logout_item" href="{% url 'account:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
             </li>
         </ul>
     {% endif %}
@@ -106,7 +122,6 @@
                         <div class="collapse" id="collapseStudents" aria-labelledby="headingOne"
                              data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="">Join Scenario</a>
                                 <a class="nav-link" href="{% url 'group:group_list' %}">Group</a>
                             </nav>
                         </div>

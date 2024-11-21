@@ -89,38 +89,7 @@
 
         <!-- Recent Activities and Top Scenarios -->
         <div class="row">
-            <div class="col-xl-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-history me-1"></i>
-                        Recent Activities
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Scenario</th>
-                                        <th>Step</th>
-                                        <th>Completed</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for activity in recent_activities %}
-                                    <tr>
-                                        <td>{{ activity.user_scenario.user.username }}</td>
-                                        <td>{{ activity.user_scenario.scenario.name }}</td>
-                                        <td>Step {{ activity.step.order|add:1 }}</td>
-                                        <td>{{ activity.user_scenario.created_at|timesince }} ago</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             
             <div class="col-xl-6">
                 <div class="card mb-4">

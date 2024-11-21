@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Active Directory and Remote Desktop Protocol</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1.5em 0;
+        }
+
+        /* Button styling for sections */
+        .section-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            margin: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Initially hide all sections */
+        .section-content {
+            display: none;
+        }
+
+        section {
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #4CAF50;
+        }
+
+        ul {
+            list-style-type: square;
+            margin-left: 20px;
+        }
+
+        p {
+            font-size: 1.1em;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 1em 0;
+        }
+
+        .highlight {
+            background-color: #e1f7d5;
+            padding: 0.2em 0.5em;
+            border-radius: 5px;
+        }
+
+        .important {
+            font-weight: bold;
+            color: #f44336;
+        }
+
+        .info-box {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-left: 5px solid #4CAF50;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Understanding Active Directory and Remote Desktop</h1>
+    <p>A Simple Guide to Key IT Concepts</p>
+</header>
+
+<div class="section-buttons">
+    <button class="btn" onclick="showSection('active-directory')">Active Directory</button>
+    <button class="btn" onclick="showSection('rdp')">RDP</button>
+</div>
+
+<!-- Active Directory Section -->
+<div id="active-directory" class="section-content">
+    <section>
+        <h2>What is Active Directory (AD)?</h2>
+        <p>Active Directory (AD) is a system used by companies to organize and manage the information about their
+            network. It's like a huge address book that tracks users, computers, printers, and other devices in the
+            company.</p>
+        <p>AD decides who has access to what on the company's network. For example, when you log into your work
+            computer, AD checks your username and password to make sure you are allowed to use it and access files or
+            applications.</p>
+        <p><span class="highlight">In short:</span> Active Directory controls access, security, and organization in a
+            company's network, ensuring only authorized users can do certain things.</p>
+    </section>
+
+    <section>
+        <h2>Why is Active Directory Often Targeted by Hackers?</h2>
+        <p>Active Directory is a major target for hackers because it controls access to everything in the network. If a
+            hacker gains control over AD, they can access files, steal data, and even take down systems.</p>
+        <p><span class="important">Why do hackers target AD?</span></p>
+        <ul>
+            <li><strong>It’s the key to everything:</strong> AD controls access to all systems, files, and services.
+            </li>
+            <li><strong>Admin access:</strong> The people managing AD have powerful access to the whole network, making
+                it a prime target for hackers.
+            </li>
+            <li><strong>Gateway to other systems:</strong> AD can be used to access other parts of the network.</li>
+            <li><strong>High-value credentials:</strong> AD stores usernames, passwords, and other sensitive data that
+                hackers can steal to impersonate users.
+            </li>
+        </ul>
+        <p><span class="highlight">In short:</span> AD is like the central control hub for everything on a company's
+            network, making it a very attractive target for cybercriminals.</p>
+    </section>
+
+    <section>
+        <h2>How Does Active Directory Authentication Work?</h2>
+        <p>When you try to log into a computer on a network, AD checks your identity to make sure you're authorized to
+            use it. Here's a simplified breakdown:</p>
+        <ol>
+            <li><strong>Step 1:</strong> You type in your username and password.</li>
+            <li><strong>Step 2:</strong> The computer asks AD to verify your credentials.</li>
+            <li><strong>Step 3:</strong> AD checks the password and either grants or denies access based on a match.
+            </li>
+        </ol>
+        <p><span class="highlight">There are two main methods of authentication:</span></p>
+        <ul>
+            <li><strong>Kerberos:</strong> This method gives you a special pass or "ticket" to access systems, like a
+                school ID that proves you're allowed in.
+            </li>
+            <li><strong>NTLM:</strong> An older method where your password is checked each time you log in or access
+                something.
+            </li>
+        </ul>
+        <p><span class="highlight">Important Note:</span> If someone steals your password or your authentication ticket,
+            they might impersonate you to access sensitive systems and data.</p>
+    </section>
+
+    <section>
+        <h2>What you will learn in this module</h2>
+        <ul>
+            <li><strong>Act as real world attacker</strong> You will be using certain tools to perform attack on another
+                victim machine
+            </li>
+            <li><strong>Admin access:</strong> The people managing AD have powerful access to the whole network, making
+                it a prime target for hackers.
+            </li>
+            <li><strong>Gateway to other systems:</strong> AD can be used to access other parts of the network.</li>
+            <li><strong>High-value credentials:</strong> AD stores usernames, passwords, and other sensitive data that
+                hackers can steal to impersonate users.
+            </li>
+        </ul>
+        <p><span class="highlight">In short:</span> AD is like the central control hub for everything on a company's
+            network, making it a very attractive target for cybercriminals.</p>
+    </section>
+
+    <section class="info-box">
+        <p><strong>Quick Summary:</strong> Active Directory makes sure only authorized users can log in and access
+            important systems. If hackers manage to steal your login details or authentication tickets, they could break
+            into your account and cause serious damage.</p>
+    </section>
+</div>
+
+<!-- RDP Section -->
+<div id="rdp" class="section-content">
+    <section>
+        <h2>What is RDP (Remote Desktop Protocol)?</h2>
+        <p>RDP is a technology that allows you to access and control another computer remotely over the internet or a
+            network. It’s like being able to sit at your desk at home but still use your work computer in the
+            office.</p>
+        <p>For example, if you're working from home and need a program that’s only on your office computer, you can use
+            RDP to connect and work on it remotely.</p>
+        <p><span class="highlight">Key point:</span> RDP allows you to control another computer as if you were sitting
+            right in front of it.</p>
+    </section>
+
+    <section>
+        <h2>Why is RDP Often Targeted by Hackers?</h2>
+        <p>RDP is a common target for hackers because it allows remote access to systems. If an attacker gains access to
+            an RDP session, they can take control of the target computer and its data.</p>
+        <ul>
+            <li><strong>Weak Passwords:</strong> Many RDP attacks come from weak passwords that are easy for hackers to
+                guess.
+            </li>
+            <li><strong>Exposed RDP Ports:</strong> Sometimes companies leave RDP ports open to the internet, making it
+                easy for attackers to find and exploit.
+            </li>
+            <li><strong>Unpatched Systems:</strong> If the RDP software is not kept up to date, vulnerabilities can be
+                exploited.
+            </li>
+        </ul>
+    </section>
+
+    <section class="info-box">
+        <p><strong>Quick RDP Summary:</strong> RDP allows you to remotely access computers, but if not properly secured,
+            it can be exploited by attackers to gain unauthorized access to systems and data.</p>
+    </section>
+</div>
+
+<!-- Go to Home Button -->
+<a href="{% url 'scenario:console' %}" class="go-home-btn">Go to Home Page</a>
+
+<footer>
+    <p>&copy; 2024 Understanding IT Concepts. All Rights Reserved.</p>
+</footer>
+
+<script>
+    // Function to show the selected section and hide others
+    function showSection(sectionId) {
+        // Hide both sections by default
+        document.getElementById('active-directory').style.display = 'none';
+        document.getElementById('rdp').style.display = 'none';
+
+        // Show the clicked section
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Initially show the Active Directory section
+    window.onload = function () {
+        showSection('active-directory');
+    }
+</script>
+
+</body>
+
+</html>
