@@ -8,12 +8,11 @@
         /* Main Container */
         .container {
             max-width: 1200px;
-            margin: 0 auto;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 70px;
+            margin: 70px auto 0;
         }
 
         /* Flexbox layout for header */
@@ -123,47 +122,88 @@
         <div class="header">
             <h2>Available Quizzes</h2>
             {% if user.is_staff %}
-                <a href="" class="create-quiz-btn">
+                <a href="{% url 'quiz:CreateQuiz' scenario.id %}" class="create-quiz-btn">
                     <i class="fas fa-plus"></i> Create Quiz
                 </a>
             {% endif %}
         </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
         <ul id="quiz-list">
-            {% if quizzes %}
-                {% for quiz in quizzes %}
-                    <li class="quiz-item" onclick="window.location.href='{% url 'quiz:TakeQuiz' quiz.id %}'">
-                        <div class="quiz-info">
-                            <h3 class="quiz-title">{{ quiz.title }}</h3>
-                            <div class="quiz-meta">
-                            </div>
+            {% if quiz %}
+                <li class="quiz-item">
+                    <div class="quiz-info" role="button" data-href="{% url 'quiz:TakeQuiz' scenario.id %}">
+                        <h3 class="quiz-title">{{ quiz.title }}</h3>
+                        <div class="quiz-meta">
+                            Created for: {{ quiz.scenario.name }}
                         </div>
-                        {% if user == quiz.user %}
-                            <div class="quiz-actions">
-                                <button onclick="event.stopPropagation(); deleteQuiz({{ quiz.id }})"
-                                        class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        {% endif %}
-                    </li>
-                {% endfor %}
+                    </div>
+                    {% if user.is_staff %}
+                        <div class="quiz-actions">
+                            <a href="{% url 'quiz:EditQuiz' scenario.id %}" 
+                               class="btn btn-primary btn-sm me-2">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-danger btn-sm"
+                                    data-delete-url="{% url 'quiz:DeleteQuiz' scenario.id %}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    {% endif %}
+                </li>
             {% else %}
-                <li class="quiz-item" style="text-align: center; cursor: default;">
+                <li class="quiz-item" style="text-align: center;">
                     <p>No quizzes available yet.</p>
                 </li>
             {% endif %}
         </ul>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quizList = document.getElementById('quiz-list');
+            quizList.addEventListener('click', function(e) {
+                const quizInfo = e.target.closest('.quiz-info');
+                if (quizInfo) {
+                    const href = quizInfo.dataset.href;
+                    if (href) {
+                        window.location.href = href;
+                    }
+                }
+            });
 
+            const deleteButtons = document.querySelectorAll('[data-delete-url]');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const deleteUrl = this.dataset.deleteUrl;
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = deleteUrl;
+                            
+                            const csrfToken = document.createElement('input');
+                            csrfToken.type = 'hidden';
+                            csrfToken.name = 'csrfmiddlewaretoken';
+                            csrfToken.value = '{{ csrf_token }}';
+                            form.appendChild(csrfToken);
+                            
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 {% endblock %}
