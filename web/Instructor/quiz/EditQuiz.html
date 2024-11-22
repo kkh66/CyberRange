@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Quiz{% endblock %}
+
+{% block styles %}
+    <style>
+        .body {
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: #333;
+            min-height: calc(100vh - 56px);
+            padding: 2rem;
+            position: relative;
+            margin: -1.5rem -1.5rem 0;
+
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 80px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #4e54c8;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        /* Question Container */
+        #questions-container {
+            margin-top: 20px;
+        }
+
+        .question-card {
+            background-color: #f4f7fc;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-card input[type="text"],
+        .question-card select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .custom_btn {
+            background-color: #6964f0;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .custom_btn:hover {
+            background-color: #5d40d3;
+        }
+
+        #add-question-btn {
+            background-color: #ff6f61;
+        }
+
+        #add-question-btn:hover {
+            background-color: #e05647;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="body">
+        <div class="container">
+            <h2><b>Edit Quiz</b></h2>
+            <form id="quiz-form" method="POST" action="{% url 'quiz:EditQuiz' scenario.id %}">
+                {% csrf_token %}
+                <label for="quiz-title">Quiz Title:</label>
+                <input type="text" id="quiz-title" name="title" value="{{ quiz.title }}" required>
+
+                <div id="questions-container">
+                    {% for question in quiz.questions.all %}
+                        <div class="question-card">
+                            <label>Question {{ forloop.counter }}:</label>
+                            <input type="text" name="questions[{{ forloop.counter }}][question_text]" 
+                                   value="{{ question.question_text }}" required>
+                            
+                            <label>Option A:</label>
+                            <input type="text" name="questions[{{ forloop.counter }}][option_a]" 
+                                   value="{{ question.option_a }}" required>
+                            
+                            <label>Option B:</label>
+                            <input type="text" name="questions[{{ forloop.counter }}][option_b]" 
+                                   value="{{ question.option_b }}" required>
+                            
+                            <label>Option C:</label>
+                            <input type="text" name="questions[{{ forloop.counter }}][option_c]" 
+                                   value="{{ question.option_c }}" required>
+                            
+                            <label>Option D:</label>
+                            <input type="text" name="questions[{{ forloop.counter }}][option_d]" 
+                                   value="{{ question.option_d }}" required>
+                            
+                            <label>Correct Answer:</label>
+                            <select name="questions[{{ forloop.counter }}][correct_option]" required>
+                                <option value="A" {% if question.correct_option == 'A' %}selected{% endif %}>A</option>
+                                <option value="B" {% if question.correct_option == 'B' %}selected{% endif %}>B</option>
+                                <option value="C" {% if question.correct_option == 'C' %}selected{% endif %}>C</option>
+                                <option value="D" {% if question.correct_option == 'D' %}selected{% endif %}>D</option>
+                            </select>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" id="add-question-btn" class="custom_btn">Add Question</button>
+                <button type="submit" class="custom_btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let questionCount = {{ quiz.questions.count }};
+
+        document.getElementById('add-question-btn').addEventListener('click', () => {
+            questionCount++;
+            const questionsContainer = document.getElementById('questions-container');
+
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+            questionCard.innerHTML = `
+                <label>Question ${questionCount}:</label>
+                <input type="text" name="questions[${questionCount}][question_text]" required>
+                
+                <label>Option A:</label>
+                <input type="text" name="questions[${questionCount}][option_a]" required>
+                
+                <label>Option B:</label>
+                <input type="text" name="questions[${questionCount}][option_b]" required>
+                
+                <label>Option C:</label>
+                <input type="text" name="questions[${questionCount}][option_c]" required>
+                
+                <label>Option D:</label>
+                <input type="text" name="questions[${questionCount}][option_d]" required>
+                
+                <label>Correct Answer:</label>
+                <select name="questions[${questionCount}][correct_option]" required>
+                    <option value="">Select Answer</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            `;
+            questionsContainer.appendChild(questionCard);
+        });
+    </script>
+{% endblock %}

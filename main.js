@@ -1,4 +1,5 @@
 const {app, BrowserWindow, dialog, session} = require('electron');
+const path = require('path');
 
 let mainWindow;
 
@@ -7,6 +8,7 @@ async function createWindow() {
         width: 1600,
         height: 1000,
         title: 'Cyber Range',
+        icon: path.join(__dirname, 'tarIco.ico'),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
