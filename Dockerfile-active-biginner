@@ -69,7 +69,6 @@ RUN apt-get update && \
 COPY /root /
 COPY /fyp.py /config/Desktop/fyp.py
 COPY /beginnerInstruction.txt /config/Desktop/beginnerInstruction.txt
-COPY /advancedInstruction.txt /config/Desktop/advancedInstruction.txt
 COPY /tut.txt /config/Desktop/tut.txt
 
 ENV PYTHONUNBUFFERED=1
@@ -79,7 +78,6 @@ RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix && \
     chmod 777 /config/Desktop && \
     chmod 777 /config/Desktop/fyp.py && \
     chmod 777 /config/Desktop/beginnerInstruction.txt && \
-    chmod 777 /config/Desktop/advancedInstruction.txt && \
     chmod 777 /config/Desktop/tut.txt
 RUN gzip -d /usr/share/wordlists/rockyou.txt.gz
 
