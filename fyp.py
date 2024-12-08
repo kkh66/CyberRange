@@ -23,6 +23,7 @@ class NotepadManager:
     def load_instructions(self):
         with open(self.filepath, 'r') as file:
             content = file.read()
+            print(repr(content))
             return [p for p in content.split('\n\n') if p.strip()]
 
     def create_notepad(self):
@@ -137,15 +138,15 @@ class Application(tk.Tk):
             return file_path
 
     def start_beginner(self):
-        instruction_file = self.find_instruction_file("beginnerInstruction.txt")
+        instruction_file = self.find_instruction_file("beginnerInstruction.txt")  # Changed here
         if instruction_file:
             logger.info("Level: Beginner")
             self.start_instruction(instruction_file, increment=10)
 
     def start_advanced(self):
-        instruction_file = self.find_instruction_file("advancedInstruction.txt")
+        instruction_file = self.find_instruction_file("advancedInstruction.txt")  # Changed here
         if instruction_file:
-            logger.info("Level: Advanced")
+            logger.info("Level: Advanced") 
             self.start_instruction(instruction_file, increment=20)
 
     def start_instruction(self, filename, increment):
@@ -167,7 +168,7 @@ class Application(tk.Tk):
     def forward(self):
         if self.notepad_manager:
             if self.notepad_manager.next_paragraph():
-                increment = 9.1 if self.notepad_manager.filepath.endswith("advancedInstruction.txt") else 7
+                increment = 16.67 if self.notepad_manager.filepath.endswith("advancedInstruction.txt") else 10
                 self.percentage_window.update_percentage(increment)
 
             if self.percentage_window.percentage == 100:
@@ -176,7 +177,7 @@ class Application(tk.Tk):
     def back(self):
         if self.notepad_manager:
             if self.notepad_manager.previous_paragraph():
-                decrement = 9.1 if self.notepad_manager.filepath.endswith("advancedInstruction.txt") else 7
+                decrement = 16.67 if self.notepad_manager.filepath.endswith("advancedInstruction.txt") else 10
                 self.percentage_window.decrease_percentage(decrement)
 
     def on_instruction_complete(self):

@@ -32,3 +32,20 @@ class StaffActivationPin(models.Model):
 
     def is_valid(self):
         return self.is_active and timezone.now() < self.expires_at
+
+
+class LoginAttempt(models.Model):
+    MAX_ATTEMPTS = 3  # Easy to modify max attempts in one place
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @classmethod
+    def get_failed_attempts(cls, user):
+        return cls.objects.filter(user=user).count()
+    
+    @classmethod
+    def clear_attempts(cls, user):
+        cls.objects.filter(user=user).delete()
+        
+    @classmethod
+    def add_failed_attempt(cls, user):
+        cls.objects.create(user=user)
