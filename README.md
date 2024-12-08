@@ -1,1 +1,1 @@
-pip install django,mysqlclient 2.2.4,docker
+<code>python -m pip install requirements.txt</code>
