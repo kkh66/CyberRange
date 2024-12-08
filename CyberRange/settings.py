@@ -40,8 +40,10 @@ INSTALLED_APPS = [
     "account.apps.AccountConfig",
     "scenario.apps.ScenarioConfig",
     "group.apps.GroupConfig",
-    "axes",
-    "quiz.apps.QuizConfig"
+    "quiz.apps.QuizConfig",
+    "tutorial.apps.TutorialConfig",
+    'tinymce',
+    'rating.apps.RatingConfig'
 ]
 
 MIDDLEWARE = [
@@ -52,7 +54,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'CyberRange.urls'
@@ -81,10 +82,10 @@ WSGI_APPLICATION = 'CyberRange.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'FYP',
-        'USER': 'FYPProject',
-        'PASSWORD': 'konghang9',
-        'HOST': '192.168.1.120',
+        'NAME': 'fyp',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -162,15 +163,23 @@ URL_FETCH_MAX_LENGTH = 200
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Django-axes settings
-AXES_FAILURE_LIMIT = 3
-AXES_LOCK_OUT_AT_FAILURE = True
-AXES_COOLOFF_TIME = 24  # Hours
-AXES_LOCKOUT_TEMPLATE = None
-AXES_LOCKOUT_URL = None
-AXES_RESET_ON_SUCCESS = True
-
-AUTHENTICATION_BACKENDS = [
-    'account.views.CustomAxesBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 360,
+    'width': 'auto',
+    'plugins': '''
+        advlist autolink lists link image charmap preview
+        table code fullscreen insertdatetime media paste
+        code help wordcount
+        ''',
+    'toolbar': '''
+        undo redo | formatselect | bold italic backcolor | 
+        alignleft aligncenter alignright alignjustify |
+        bullist numlist | link image media | code
+        ''',
+    'images_upload_url': '/tutorial/upload_image/',
+    'automatic_uploads': True,
+    'images_reuse_filename': True,
+    'menubar': False,
+    'statusbar': True,
+    'promotion': False
+}

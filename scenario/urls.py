@@ -4,28 +4,35 @@ from scenario import views
 app_name = 'scenario'
 
 urlpatterns = [
-    # Add this at the top level
-    path('console/', views.console_view, name='console'),
-    # Scenario list and global operations
-    path('all/', views.list_all_scenarios, name='list_all_scenarios'),
-    path('group/<int:group_id>/', views.scenario_list, name='scenario_list'),
-    path('group/<int:group_id>/create/', views.create_scenario, name='create_scenario'),
+    # Global views
+    path('', include([
+        path('all/', views.list_all_scenarios, name='list_all_scenarios'),
+        path('console/', views.console, name='console'),
+    ])),
 
-    # Specific scenario operations
+    # Group-specific operations
+    path('group/<int:group_id>/', include([
+        path('', views.scenario_list, name='scenario_list'),
+        path('create/', views.create_scenario, name='create_scenario'),
+    ])),
+
+    # Scenario-specific operations
     path('<int:scenario_id>/', include([
         path('', views.scenario_detail, name='scenario_detail'),
         path('edit/', views.edit_scenario, name='edit_scenario'),
         path('delete/', views.delete_scenario, name='delete_scenario'),
         path('start/', views.start_scenario, name='start_scenario'),
-
-        path('rate/', views.rate_scenario, name='rate_scenario'),
-        path('ratings/analytics/', views.rating_analytics, name='rating_analytics'),
+        path('approve/<int:user_id>/', views.approve_scenario, name='approve_scenario'),
+        path('description', views.scenario_description, name='ScenarioDescription'),
+        path('details/', views.manage_scenario_description, name='ScenarioAddDescription'),
 
         # Container management
         path('container/', include([
+            path('status/', views.get_container_status, name='container_status'),
             path('action/', views.container_action, name='container_action'),
         ])),
-
-        path('status/', views.get_container_status, name='container_status'),
     ])),
+
+    # Screenshot submission
+    path('submit-screenshots/<int:scenario_id>/', views.submit_screenshots, name='submit_screenshots'),
 ]

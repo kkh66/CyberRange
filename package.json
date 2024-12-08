@@ -13,9 +13,11 @@
     "appId": "com.cyberrange.app",
     "productName": "CyberRange",
     "win": {
-      "target": ["portable"],
+      "target": [
+        "portable"
+      ],
       "artifactName": "${productName}-${version}.${ext}",
-        "icon": "tarIco.ico"
+      "icon": "tarIco.ico"
     },
     "files": [
       "**/*",
@@ -38,5 +40,8 @@
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "25.1.8"
+  },
+  "dependencies": {
+    "tinymce": "^7.5.1"
   }
 }

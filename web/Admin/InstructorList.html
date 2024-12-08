@@ -1,150 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
-{% block title %}
-    Instructor List
-{% endblock %}
+
+{% block title %}Instructor List{% endblock %}
+
 {% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %} ">
     <style>
-        :root {
-            --primary-dark: #1a237e;
-            --secondary-dark: #d84315;
-            --accent-dark: #2c387e;
-            --dark-orange: #bf360c;
-            --glass-bg: rgba(33, 33, 33, 0.8);
-        }
-
-        .instructor_container {
-            min-height: 100vh;
-            padding: 2rem;
-            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
-            animation: gradientAnimation 3s ease infinite;
-            position: relative;
-            margin: -1.5rem -1.5rem 0;
-        }
-
-        .dashboard_card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .dashboard_header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .dashboard_title {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(45deg, #fff, #e0e0e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .instructor_table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 0.5rem;
-        }
-
-        .instructor_table th {
-            padding: 1rem;
-            text-align: left;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-        }
-
-        .instructor_table td {
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .instructor_table tr {
-            transition: transform 0.3s ease;
-        }
-
-        .instructor_table tr:hover {
-            transform: translateX(10px);
-        }
-
-        .instructor_table tr td:first-child {
-            border-radius: 10px 0 0 10px;
-        }
-
-        .instructor_table tr td:last-child {
-            border-radius: 0 10px 10px 0;
-        }
-
-        .status-active {
-            background: rgba(46, 125, 50, 0.2);
-            color: #81c784;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: inline-block;
-            animation: pulseAnimation 2s infinite;
-        }
-
-        .status-inactive {
-            background: rgba(198, 40, 40, 0.2);
-            color: #e57373;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: inline-block;
-            animation: pulseAnimation 2s infinite;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulseAnimation {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* New Toggle Switch Styles */
+        /* Modern Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 52px;
+            height: 28px;
         }
 
         .switch input {
@@ -160,7 +28,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             transition: .4s;
             border-radius: 34px;
         }
@@ -168,8 +36,8 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
+            height: 20px;
+            width: 20px;
             left: 4px;
             bottom: 4px;
             background-color: white;
@@ -178,164 +46,117 @@
         }
 
         input:checked + .slider {
-            background-color: var(--dark-orange);
+            background: #3b82f6;
         }
 
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(24px);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .search-button i {
+            margin-right: 8px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="instructor_container">
-        <div class="dashboard_card">
-            <div class="dashboard_header">
-                <h1 class="dashboard_title">Instructor List</h1>
+    <div class="animated_background bg_fi"></div>
+    {% if user.is_superuser %}
+        <div class="custom_container">
+            <div class="base_card mt-3">
+                <div class="base_header d-flex justify-content-between align-items-center">
+                    <h1 class="base_title">Instructor List</h1>
+                    <form id="searchForm" method="GET" action="{% url 'account:Instructor_list' %}"
+                          class="search-container">
+                        <input type="text"
+                               id="searchInput"
+                               name="search"
+                               class="search-input"
+                               placeholder="Search by username or email..."
+                               value="{{ request.GET.search|default:'' }}">
+                        <button type="submit" class="search-button">
+                            <i class="fas fa-search"></i>Search
+                        </button>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="instructor_table">
+                        <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for staff in staff_members %}
+                            <tr>
+                                <td>{{ staff.username }}</td>
+                                <td>{{ staff.email }}</td>
+                                <td>
+                                    <span class="status-{% if staff.is_active %}active{% else %}inactive{% endif %}">
+                                        {% if staff.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <label class="switch">
+                                        <input type="checkbox"
+                                               {% if staff.is_active %}checked{% endif %}
+                                               onchange="toggleStatus(this, '{% url 'account:Btn_Instructor_Status' staff.id %}')">
+                                        <span class="slider"></span>
+                                    </label>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="empty_state">
+                                    <i class="fas fa-users-slash fa-3x mb-3"></i>
+                                    <p>{% trans 'No Instructor found.' %}</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <table class="instructor_table">
-                <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for staff in staff_members %}
-                    <tr>
-                        <td>{{ staff.username }}</td>
-                        <td>{{ staff.email }}</td>
-                        <td>
-                                <span class="status-{% if staff.is_active %}active{% else %}inactive{% endif %}">
-                                    {% if staff.is_active %}Active{% else %}Inactive{% endif %}
-                                </span>
-                        </td>
-                        <td>
-                            <label class="switch">
-                                <input type="checkbox"
-                                       {% if staff.is_active %}checked{% endif %}
-                                       onchange="toggleStatus(this, '{% url 'account:Btn_Instructor_Status' staff.id %}')">
-                                <span class="slider"></span>
-                            </label>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">{% trans 'No staff members found.' %}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
         </div>
-    </div>
-
-    <script>
-        // Custom SweetAlert2 styling
-        const swalCustom = Swal.mixin({
-            customClass: {
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel',
-                popup: 'swal2-popup'
-            },
-            buttonsStyling: false
-        });
-
-        // Add custom styles for SweetAlert
-        const swalStyles = `
-            <style>
-                .swal2-popup {
-                    background: rgba(33, 33, 33, 0.95) !important;
-                    backdrop-filter: blur(10px) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                    border-radius: 15px !important;
-                }
-
-                .swal2-title, .swal2-html-container {
-                    color: #fff !important;
-                }
-
-                .swal2-confirm {
-                    background: linear-gradient(135deg, #bf360c, #d84315) !important;
-                    color: white !important;
-                    border: none !important;
-                    padding: 10px 24px !important;
-                    border-radius: 8px !important;
-                    margin: 5px !important;
-                    transition: transform 0.3s ease !important;
-                }
-
-                .swal2-cancel {
-                    background: linear-gradient(135deg, #1a237e, #283593) !important;
-                    color: white !important;
-                    border: none !important;
-                    padding: 10px 24px !important;
-                    border-radius: 8px !important;
-                    margin: 5px !important;
-                    transition: transform 0.3s ease !important;
-                }
-
-                .swal2-confirm:hover, .swal2-cancel:hover {
-                    transform: translateY(-2px) !important;
-                }
-
-                .swal2-icon {
-                    border-color: #bf360c !important;
-                    color: #bf360c !important;
-                }
-            </style>
-        `;
-
-        // Add styles to document head
-        document.head.insertAdjacentHTML('beforeend', swalStyles);
-
-        function toggleStatus(checkbox, url) {
-            const newStatus = checkbox.checked ? 'activate' : 'deactivate';
-            
-            swalCustom.fire({
-                title: 'Are you sure?',
-                text: `Do you want to ${newStatus} this staff member?`,
-                icon: 'warning',
-                showCancelButton: true, 
-                cancelButtonText: 'Cancel',
-                confirmButtonText: 'Yes, change it!',
-                background: 'rgba(33, 33, 33, 0.95)',
-                reverseButtons: true,
-                backdrop: `
-                    rgba(15, 23, 42, 0.4)
-                    left top
-                    no-repeat
-                `
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Show loading state
-                    swalCustom.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we update the status.',
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                        willOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-                    
-                    // Redirect to update status
-                    window.location.href = url;
-                } else {
-                    // Revert checkbox state
-                    checkbox.checked = !checkbox.checked;
-                    
-                    // Show cancelled message
-                    swalCustom.fire({
-                        title: 'Cancelled',
-                        text: 'Status change was cancelled',
-                        icon: 'info',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }
-            });
-        }
-    </script>
+    {% endif %}
 {% endblock %}

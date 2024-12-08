@@ -4,49 +4,18 @@
 {% block title %}Quiz List{% endblock %}
 
 {% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <style>
         /* Main Container */
         .container {
             max-width: 1200px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
             margin: 70px auto 0;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Flexbox layout for header */
-        .container .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            font-size: 2.5rem;
-            color: #6964f0;
-            font-weight: 600;
-        }
-
-        /* Create Quiz Button */
-        .create-quiz-btn {
-            background-color: #ff6f61;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .create-quiz-btn:hover {
-            background-color: #e05647;
-            transform: translateY(-3px);
-        }
-
-        /* Quiz List Styles */
+        /* Quiz List */
         #quiz-list {
             list-style-type: none;
             padding: 0;
@@ -54,12 +23,13 @@
         }
 
         .quiz-item {
-            background: #e1f7d5;
-            margin: 15px 0;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -68,62 +38,77 @@
 
         .quiz-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .quiz-info {
             flex-grow: 1;
+            color: #fff;
         }
 
         .quiz-title {
             font-size: 1.2rem;
-            color: #333;
-            margin-bottom: 5px;
+            margin: 0;
+            color: #fff;
         }
 
-        .quiz-meta {
-            color: #666;
-            font-size: 0.9rem;
+        /* Action Buttons */
+        .quiz-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        /* Responsive Styles */
+        .btn {
+            backdrop-filter: blur(5px);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(59, 130, 246, 0.6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: rgba(59, 130, 246, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.6);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            h2 {
-                font-size: 2rem;
-            }
-
             .container {
-                padding: 15px;
+                padding: 1rem;
+                margin-top: 40px;
             }
 
-            .create-quiz-btn {
-                padding: 10px 18px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h2 {
-                font-size: 1.6rem;
-            }
-
-            .container {
-                padding: 10px;
-            }
-
-            .create-quiz-btn {
-                padding: 8px 16px;
+            .quiz-item {
+                padding: 1rem;
             }
         }
     </style>
 {% endblock %}
 
 {% block content %}
+    <div class="animated_background bg_fi"></div>
     <div class="container">
-        <div class="header">
-            <h2>Available Quizzes</h2>
+        <div class="base_header d-flex justify-content-between align-items-center">
+            <h2 class="base_title">Available Quizzes</h2>
             {% if user.is_staff %}
-                <a href="{% url 'quiz:CreateQuiz' scenario.id %}" class="create-quiz-btn">
-                    <i class="fas fa-plus"></i> Create Quiz
+                <a href="{% url 'scenario:list_all_scenarios' %}" class="btn_back">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Scenarios
                 </a>
             {% endif %}
         </div>
@@ -133,17 +118,14 @@
                 <li class="quiz-item">
                     <div class="quiz-info" role="button" data-href="{% url 'quiz:TakeQuiz' scenario.id %}">
                         <h3 class="quiz-title">{{ quiz.title }}</h3>
-                        <div class="quiz-meta">
-                            Created for: {{ quiz.scenario.name }}
-                        </div>
                     </div>
                     {% if user.is_staff %}
                         <div class="quiz-actions">
-                            <a href="{% url 'quiz:EditQuiz' scenario.id %}" 
+                            <a href="{% url 'quiz:EditQuiz' scenario.id %}"
                                class="btn btn-primary btn-sm me-2">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button type="button" 
+                            <button type="button"
                                     class="btn btn-danger btn-sm"
                                     data-delete-url="{% url 'quiz:DeleteQuiz' scenario.id %}">
                                 <i class="fas fa-trash"></i>
@@ -152,7 +134,7 @@
                     {% endif %}
                 </li>
             {% else %}
-                <li class="quiz-item" style="text-align: center;">
+                <li class="quiz-item empty_state" style="text-align: center;">
                     <p>No quizzes available yet.</p>
                 </li>
             {% endif %}
@@ -160,9 +142,9 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const quizList = document.getElementById('quiz-list');
-            quizList.addEventListener('click', function(e) {
+            quizList.addEventListener('click', function (e) {
                 const quizInfo = e.target.closest('.quiz-info');
                 if (quizInfo) {
                     const href = quizInfo.dataset.href;
@@ -174,10 +156,10 @@
 
             const deleteButtons = document.querySelectorAll('[data-delete-url]');
             deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
+                button.addEventListener('click', function (e) {
                     e.stopPropagation();
                     const deleteUrl = this.dataset.deleteUrl;
-                    
+
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "You won't be able to revert this!",
@@ -191,13 +173,13 @@
                             const form = document.createElement('form');
                             form.method = 'POST';
                             form.action = deleteUrl;
-                            
+
                             const csrfToken = document.createElement('input');
                             csrfToken.type = 'hidden';
                             csrfToken.name = 'csrfmiddlewaretoken';
                             csrfToken.value = '{{ csrf_token }}';
                             form.appendChild(csrfToken);
-                            
+
                             document.body.appendChild(form);
                             form.submit();
                         }

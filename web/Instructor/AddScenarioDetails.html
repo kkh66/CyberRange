@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if scenario_details %}Edit{% else %}Add{% endif %} Scenario Details
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <script src="{% static 'js/tinymce/tinymce.min.js' %}" referrerpolicy="origin"></script>
+    <style>
+        .level-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .level-form {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .level-form:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .remove-level {
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-level:hover {
+            transform: scale(1.1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="base_container">
+        <div class="animated_background bg_fi"></div>
+        <div class="content-wrapper">
+            <div class="base_card">
+                <div class="base_header">
+                    <h1>{% if scenario_details %}Edit{% else %}Add{% endif %} Details for {{ scenario.name }}</h1>
+                </div>
+
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Main Scenario Details -->
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea name="description"
+                                  class="tinymce">{{ scenario_details.description|default:'' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Learning Objectives</label>
+                        <textarea name="objectives"
+                                  class="tinymce">{{ scenario_details.objectives|default:'' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Prerequisites</label>
+                        <textarea name="prerequisites"
+                                  class="tinymce">{{ scenario_details.prerequisites|default:'' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Detailed Objectives</label>
+                        <textarea name="objective_detail"
+                                  class="tinymce">{{ scenario_details.objective_detail|default:'' }}</textarea>
+                    </div>
+
+                    <!-- Level Management -->
+                    <div class="level-section">
+                        <div class="scenario_level_header d-flex justify-content-between align-items-center">
+                            <h5>Difficulty Levels</h5>
+                            <button type="button" class="scenario_level_btn" onclick="addLevelForm()">
+                                <i class="fas fa-plus me-2"></i>Add Level
+                            </button>
+                        </div>
+                        <div id="levels-container">
+                            {% for level in levels %}
+                                <div class="level-form" data-level-id="{{ level.id }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 base_header scenario_all_header">
+                                        <h6 class="m-0">Level Settings</h6>
+                                        <i class="fas fa-times remove-level" onclick="removeLevel(this)"></i>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <label class="form-label">Difficulty</label>
+                                            <select name="level_{{ level.id }}_difficulty"
+                                                    class="form-select custom-select" required>
+                                                {% for value, label in difficulty_choices %}
+                                                    <option value="{{ value }}"
+                                                            {% if level.difficulty == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-col">
+                                            <label class="form-label">Mode</label>
+                                            <select name="level_{{ level.id }}_mode" class="form-select custom-select"
+                                                    required>
+                                                {% for value, label in mode_choices %}
+                                                    <option value="{{ value }}"
+                                                            {% if level.mode == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-col">
+                                            <label class="form-label">Time (minutes)</label>
+                                            <input type="number" name="level_{{ level.id }}_time"
+                                                   class="form-control" value="{{ level.recommended_time }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Required Tools</label>
+                                        <input type="text" name="level_{{ level.id }}_tools"
+                                               class="form-control" value="{{ level.tools }}"
+                                               placeholder="e.g., Kali Linux terminal, RDP from host machine" required>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'scenario:list_all_scenarios' %}"
+                           class="btn btn_close_modal">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-custom">
+                            <i class="fas fa-save me-2"></i>Save Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Initialize level management with data from Django template
+        document.addEventListener('DOMContentLoaded', function () {
+            const initialLevelCount = {{ levels|length }};
+            const difficulties = {
+                {% for value, label in difficulty_choices %}
+                    "{{ value }}": "{{ label }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            };
+            const modes = {
+                {% for value, label in mode_choices %}
+                    "{{ value }}": "{{ label }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            };
+
+            initLevelManagement(initialLevelCount, difficulties, modes);
+        });
+    </script>
+{% endblock %} 

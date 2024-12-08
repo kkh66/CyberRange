@@ -1,0 +1,227 @@
+:root {
+    --primary-dark: #1e2a3a;
+    --secondary-dark: #0f172a;
+    --accent-color: #3b82f6;
+    --accent-orange: #f97316;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    margin: -1.5rem -1.5rem 0;
+    overflow: hidden;
+    padding: 2rem 0 0 0;
+    margin-bottom: 24px;
+}
+
+.animated_background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+    background-size: 400% 400%;
+    animation: gradient_shift 15s ease infinite;
+    z-index: -1;
+    top: 0;
+    left: 0;
+}
+
+.tutorial-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    z-index: 2;
+    margin: 2rem 1rem;
+    animation: card_float 0.8s ease-out;
+}
+
+.tutorial-header {
+    color: white;
+}
+
+.tutorial-list {
+    list-style: none;
+    padding: 0;
+}
+
+.tutorial-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.section-container {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 2rem 1.5rem 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.section-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.section-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-action {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: #fff;
+}
+
+.button_prev {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.button_prev:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-5px);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.button_next {
+    background: var(--accent-orange);
+    border: none;
+}
+
+.button_next:hover {
+    background: #ea580c;
+    transform: translateX(5px);
+    color: white;
+}
+
+.form-control {
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 0.5rem 1rem;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    color: #fff;
+}
+
+.form-label {
+    color: #fff;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.modal-content {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    color: #fff;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.tox-tinymce {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    background: var(--glass-bg) !important;
+}
+
+.tox .tox-edit-area__iframe {
+    background: rgba(30, 41, 59, 0.8) !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+.tox .tox-tbtn {
+    color: #fff !important;
+}
+
+.tox .tox-tbtn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.tox .tox-tbtn--enabled,
+.tox .tox-tbtn--enabled:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+@keyframes gradient_shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes card_float {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .tutorial-content {
+        padding: 1rem;
+    }
+
+    .section-card {
+        margin: 1rem;
+    }
+
+    .section-header {
+        text-align: center;
+    }
+}

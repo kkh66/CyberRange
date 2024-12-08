@@ -1,181 +1,286 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}
+    All Scenarios
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            color: #fff;
+        }
+
+        .form-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .btn {
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: rgba(59, 130, 246, 0.9);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: rgba(59, 130, 246, 1);
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: rgba(6, 182, 212, 0.9);
+            border: none;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: rgba(6, 182, 212, 1);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            border-color: rgba(59, 130, 246, 0.5);
+            color: rgba(59, 130, 246, 0.9);
+        }
+
+        .btn-outline-danger {
+            border-color: rgba(239, 68, 68, 0.5);
+            color: rgba(239, 68, 68, 0.9);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .badge {
+            backdrop-filter: blur(5px);
+            font-weight: 500;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-    <div class="container py-5">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="display-6 mb-0">
-                    <i class="fas fa-laptop-code me-2"></i>
-                    All Scenarios
-                </h2>
-                <p class="text-muted mt-2">Manage all scenarios and their steps</p>
-            </div>
-        </div>
-
-        <!-- Filter Section -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <form method="get" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label for="group" class="form-label">Filter by Group</label>
-                        <select class="form-select" id="group" name="group">
-                            <option value="">All Groups</option>
-                            {% for group in groups %}
-                                <option value="{{ group.id }}" {% if selected_group == group.id %}selected{% endif %}>
-                                    {{ group.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="search" class="form-label">Search Scenarios</label>
-                        <input type="text" class="form-control" id="search" name="search"
-                               value="{{ search_query }}" placeholder="Search by name...">
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-filter me-2"></i>Apply Filters
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Scenarios List -->
-        <div class="row g-4">
-            {% for group_scenario in group_scenarios %}
-                <div class="col-md-4">
-                    <div class="card h-100 shadow hover-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title mb-0">{{ group_scenario.scenario.name }}</h5>
-                                <span class="badge bg-primary">{{ group_scenario.group.name }}</span>
-                            </div>
-                            <p class="card-text">{{ group_scenario.scenario.description }}</p>
-                            <div class="meta-info">
-                                <small class="text-muted">
-                                    <i class="fa-brands fa-docker me-2"></i>
-                                    {{ group_scenario.scenario.docker_name }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <div class="d-flex gap-2">
-                                <a href="{% url 'quiz:ListQuiz' group_scenario.scenario.id %}"
-                                   class="btn btn-primary btn-sm flex-grow-1">
-                                    <i class="fas fa-list-check me-2"></i>List Quiz
-                                </a>
-                                <a href="#" class="btn btn-outline-primary btn-sm"
-                                   data-bs-toggle="modal"
-                                   data-bs-target="#editScenarioModal{{ group_scenario.scenario.id }}">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-danger btn-sm"
-                                   data-bs-toggle="modal"
-                                   data-bs-target="#deleteScenarioModal{{ group_scenario.scenario.id }}">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </div>
+    <div class="animated_background bg_fi"></div>
+    {% if user.is_staff %}
+        <div class="base_container">
+            <div class="container py-5">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="base_header">
+                        <h2 class=" mb-0">
+                            <i class="fas fa-laptop-code me-2"></i>
+                            All Scenarios
+                        </h2>
+                        <p class="scenario_text mt-2">Manage all scenarios and their steps</p>
                     </div>
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center" role="alert">
-                        <i class="fas fa-info-circle fa-2x mb-3 d-block"></i>
-                        <p class="mb-0">No scenarios found matching your criteria.</p>
+
+                <!-- Filter Section -->
+                <div class="base_card all_scenario_card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="group" class="base_header scenario_all_header">Filter by Group</label>
+                                <select class="form-select custom-select" id="group" name="group">
+                                    <option value="">All Groups</option>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id }}"
+                                                {% if selected_group == group.id %}selected{% endif %}>
+                                            {{ group.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">Search Scenarios</label>
+                                <input type="text" class="form-control" id="search" name="search"
+                                       value="{{ search_query }}" placeholder="Search by name...">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-2"></i>Apply Filters
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    </div>
 
-    <!-- Edit Scenario Modal -->
-    {% for group_scenario in group_scenarios %}
-        <div class="modal fade" id="editScenarioModal{{ group_scenario.scenario.id }}" tabindex="-1"
-             aria-labelledby="editScenarioModalLabel{{ group_scenario.scenario.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editScenarioModalLabel{{ group_scenario.scenario.id }}">
-                            Edit Scenario
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form method="post" action="{% url 'scenario:edit_scenario' group_scenario.scenario.id %}">
-                        {% csrf_token %}
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="name{{ group_scenario.scenario.id }}" class="form-label">Scenario
-                                    Name</label>
-                                <input type="text" class="form-control" id="name{{ group_scenario.scenario.id }}"
-                                       name="name" value="{{ group_scenario.scenario.name }}" required>
+                <!-- Scenarios List -->
+                <div class="row g-4">
+                    {% if group_scenarios %}
+                        {% for group_scenario in group_scenarios %}
+                            <div class="col-md-4">
+                                <div class="base_card all_scenario_card h-100 shadow">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="base_header mb-0">{{ group_scenario.scenario.name }}</h5>
+                                            <span class="badge bg-primary">{{ group_scenario.group.name }}</span>
+                                        </div>
+                                        <div class="info_use">
+                                            <small>
+                                                <i class="fa-brands fa-docker me-2"></i>
+                                                {{ group_scenario.scenario.docker_name }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="scenario_all_footer">
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'tutorial:ListTutorials' group_scenario.scenario.id %}"
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-book me-2"></i>Tutorial
+                                            </a>
+                                            <a href="{% url 'scenario:ScenarioAddDescription' group_scenario.scenario.id %}"
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-list me-2"></i>Description
+                                            </a>
+                                            <a href="{% url 'quiz:CreateQuiz' group_scenario.scenario.id %}"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fas fa-list-check me-2"></i>Quiz
+                                            </a>
+                                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editScenarioModal{{ group_scenario.scenario.id }}">
+                                                <i class="fas fa-edit me-2"></i>Edit
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                                    onclick="confirmDelete('{{ group_scenario.scenario.name }}', '{{ group_scenario.scenario.id }}')">
+                                                <i class="fas fa-trash me-2"></i>Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="description{{ group_scenario.scenario.id }}"
-                                       class="form-label">Description</label>
-                                <textarea class="form-control" id="description{{ group_scenario.scenario.id }}"
-                                          name="description" rows="3"
-                                          required>{{ group_scenario.scenario.description }}</textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="docker_image{{ group_scenario.scenario.id }}" class="form-label">Docker
-                                    Image</label>
-                                <input type="text" class="form-control"
-                                       id="docker_image{{ group_scenario.scenario.id }}"
-                                       name="docker_image" value="{{ group_scenario.scenario.docker_name }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="time_limit{{ group_scenario.scenario.id }}" class="form-label">
-                                    Time Limit (minutes)
-                                </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="time_limit{{ group_scenario.scenario.id }}"
-                                       name="time_limit"
-                                       value="{{ group_scenario.scenario.time_limit }}"
-                                       min="1"
-                                       max="480"
-                                       required>
-                                <div class="form-text">Set between 1 and 480 minutes (8 hours)</div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="base_card all_scenario_card shadow">
+                                <div class="card-body text-center py-5 d-flex align-items-center justify-content-center">
+                                    <div>
+                                        <i class="fas fa-laptop-code fa-3x mb-3 base_title"
+                                           style="color: rgba(255, 255, 255, 0.6);"></i>
+                                        <h5 class="base_header mb-0">No scenarios found matching your criteria.</h5>
+                                        <p class="scenario_text">Try adjusting your filters or create a new
+                                            scenario.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Delete Scenario Modal -->
-        <div class="modal fade" id="deleteScenarioModal{{ group_scenario.scenario.id }}" tabindex="-1"
-             aria-labelledby="deleteScenarioModalLabel{{ group_scenario.scenario.id }}" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteScenarioModalLabel{{ group_scenario.scenario.id }}">
-                            Delete Scenario
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete the scenario "{{ group_scenario.scenario.name }}"?</p>
-                        <p class="text-danger"><small>This action cannot be undone.</small></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form method="post" action="{% url 'scenario:delete_scenario' group_scenario.scenario.id %}"
-                              class="d-inline">
+        <!-- Edit Scenario Modal -->
+        {% for group_scenario in group_scenarios %}
+            <div class="modal fade base_modal" id="editScenarioModal{{ group_scenario.scenario.id }}" tabindex="-1"
+                 aria-labelledby="editScenarioModalLabel{{ group_scenario.scenario.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content base_modal_content">
+                        <div class="modal-header group_modal_header">
+                            <h5 class="modal-title" id="editScenarioModalLabel{{ group_scenario.scenario.id }}">
+                                Edit Scenario
+                            </h5></div>
+                        <form method="post" action="{% url 'scenario:edit_scenario' group_scenario.scenario.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete Scenario</button>
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <i class="fas fa-bookmark form_icon"></i>
+                                    <input type="text" class="form-control"
+                                           id="name{{ group_scenario.scenario.id }}"
+                                           name="name" value="{{ group_scenario.scenario.name }}" required>
+                                    <label for="name{{ group_scenario.scenario.id }}">Scenario Name</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control custom_form_control"
+                                              id="description{{ group_scenario.scenario.id }}"
+                                              name="description" rows="3"
+                                              required>{{ group_scenario.scenario.description }}</textarea>
+                                    <label for="description{{ group_scenario.scenario.id }}"
+                                    >Description</label>
+                                    <i class="fas fa-align-left position-absolute top-0 start-0 ms-3 mt-3 text-white"></i>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control custom_form_control"
+                                           id="docker_image{{ group_scenario.scenario.id }}"
+                                           name="docker_image" value="{{ group_scenario.scenario.docker_name }}"
+                                           required>
+                                    <label for="docker_image{{ group_scenario.scenario.id }}">Docker
+                                        Image</label>
+                                    <i class="fab fa-docker position-absolute top-50 start-0 translate-middle-y ms-3 text-white"></i>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn_close_modal" data-bs-dismiss="modal">Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-custom">Save Changes</button>
+                            </div>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
+    <script>
+        async function confirmDelete(scenarioName, scenarioId) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                html: `You want to delete the scenario "<strong>${scenarioName}</strong>"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/scenario/${scenarioId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+
+                    if (response.ok) {
+                        await Swal.fire({
+                            title: 'Deleted!',
+                            text: 'The scenario has been deleted.',
+                            icon: 'success'
+                        });
+                        location.reload();
+                    } else {
+                        throw new Error('Failed to delete scenario');
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: error.message,
+                        icon: 'error'
+                    });
+                }
+            }
+        }
+    </script>
 {% endblock %}
