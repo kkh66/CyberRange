@@ -136,3 +136,227 @@ function copyCode() {
             console.error('Failed to copy text: ', err);
         });
 }
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+
+    let timeoutId;
+    const delay = 300; // Debounce delay in ms
+
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            const searchTerm = e.target.value.toLowerCase();
+            const contentElements = document.querySelectorAll('.base_card p, .base_card li, .level_info span');
+            
+            // Remove existing highlights
+            document.querySelectorAll('.search_highlight').forEach(el => {
+                const parent = el.parentNode;
+                parent.replaceChild(document.createTextNode(el.textContent), el);
+            });
+
+            if (searchTerm.length < 2) return; // Only search for 2+ characters
+
+            contentElements.forEach(element => {
+                const text = element.textContent;
+                if (!text) return;
+
+                const regex = new RegExp(searchTerm, 'gi');
+                const matches = text.match(regex);
+                
+                if (matches) {
+                    // Highlight matches
+                    let newHtml = text;
+                    matches.forEach(match => {
+                        newHtml = newHtml.replace(
+                            match,
+                            `<span class="search_highlight">${match}</span>`
+                        );
+                    });
+                    element.innerHTML = newHtml;
+
+                    // Scroll to first match
+                    const firstHighlight = document.querySelector('.search_highlight');
+                    if (firstHighlight) {
+                        firstHighlight.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }
+            });
+        }, delay);
+    });
+});
+
+// Instructor list functionality
+const swalCustom = Swal.mixin({
+    customClass: {
+        confirmButton: 'swal2-confirm',
+        cancelButton: 'swal2-cancel',
+        popup: 'swal2-popup'
+    },
+    buttonsStyling: false
+});
+
+function toggleStatus(checkbox, url) {
+    const newStatus = checkbox.checked ? 'activate' : 'deactivate';
+
+    swalCustom.fire({
+        title: 'Are you sure?',
+        text: `Do you want to ${newStatus} this staff member?`,
+        icon: 'warning',
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Yes, change it!',
+        background: 'rgba(33, 33, 33, 0.95)',
+        reverseButtons: true,
+        backdrop: `
+        rgba(15, 23, 42, 0.4)
+        left top
+        no-repeat
+    `
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            swalCustom.fire({
+                title: 'Processing...',
+                text: 'Please wait while we update the status.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Redirect to update status
+            window.location.href = url;
+        } else {
+            // Revert checkbox state
+            checkbox.checked = !checkbox.checked;
+
+            // Show cancelled message
+            swalCustom.fire({
+                title: 'Cancelled',
+                text: 'Status change was cancelled',
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+    });
+}
+
+// TinyMCE initialization
+document.addEventListener('DOMContentLoaded', function() {
+    tinymce.init({
+        selector: '.tinymce',
+        height: 300,
+        plugins: 'lists ',
+        toolbar: 'undo redo | formatselect | bold italic | ' +
+            'alignleft aligncenter alignright alignjustify | ' +
+            'bullist numlist | link',
+        menubar: false,
+        skin: 'oxide-dark',
+        content_css: 'dark',
+        promotion: false,
+        statusbar: false,
+        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px; color: #fff; background: #2d3748; }'
+    });
+});
+
+// Level Management
+let levelCounter = 0;
+
+// These variables will be populated from the template
+let difficultyChoices = {};
+let modeChoices = {};
+
+// Function to initialize level management
+function initLevelManagement(initialLevelCount, difficulties, modes) {
+    // Set the initial counter to the maximum of existing level IDs
+    const existingLevels = document.querySelectorAll('.level-form');
+    let maxId = 0;
+    existingLevels.forEach(level => {
+        const levelId = level.getAttribute('data-level-id');
+        if (levelId && !isNaN(levelId)) {
+            maxId = Math.max(maxId, parseInt(levelId));
+        }
+    });
+    levelCounter = Math.max(initialLevelCount, maxId);
+    
+    difficultyChoices = difficulties;
+    modeChoices = modes;
+}
+
+function addLevelForm() {
+    levelCounter++;
+
+    // Generate options HTML
+    const difficultyOptions = Object.entries(difficultyChoices)
+        .map(([value, label]) => `<option value="${value}">${label}</option>`)
+        .join('');
+
+    const modeOptions = Object.entries(modeChoices)
+        .map(([value, label]) => `<option value="${value}">${label}</option>`)
+        .join('');
+
+    const template = `
+        <div class="level-form" data-level-id="${levelCounter}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="m-0">Level Settings</h6>
+                <i class="fas fa-times remove-level" onclick="removeLevel(this)"></i>
+            </div>
+            <div class="form-row">
+                <div class="form-col">
+                    <label class="form-label">Difficulty</label>
+                    <select name="level_${levelCounter}_difficulty" class="form-select custom-select" required>
+                        ${difficultyOptions}
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label class="form-label">Mode</label>
+                    <select name="level_${levelCounter}_mode" class="form-select custom-select" required>
+                        ${modeOptions}
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label class="form-label">Time (minutes)</label>
+                    <input type="number" name="level_${levelCounter}_time" 
+                           class="form-control" value="60" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Required Tools</label>
+                <input type="text" name="level_${levelCounter}_tools" 
+                       class="form-control" 
+                       placeholder="e.g., Kali Linux terminal, RDP from host machine" required>
+            </div>
+        </div>
+    `;
+    document.getElementById('levels-container').insertAdjacentHTML('beforeend', template);
+}
+
+function removeLevel(element) {
+    const levelForm = element.closest('.level-form');
+    if (confirm('Are you sure you want to remove this level?')) {
+        levelForm.remove();
+    }
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.needs-validation');
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    }
+});
+

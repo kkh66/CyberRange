@@ -1,26 +1,31 @@
-{% extends 'base.html' %}
+gr{% extends 'base.html' %}
 {% load static %}
 {% block title %}Group{% endblock %}
 {% block styles %}
-    <link rel="stylesheet" href="{% static 'css/group.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="background_group">
-        <div class="d-flex justify-content-between align-content-between custom_group_header mt-3 mb-1"><h1>Group</h1>
+    <div class="animated_background bg_fi"></div>
+    <div class="base_container ">
+        <div class="d-flex justify-content-between align-content-between base_header mt-3 mb-1">
+            <h1>Group</h1>
             <div>
-                <button type="button" class="btn btn-primary btn_group btn_primary me-2" data-bs-toggle="modal"
-                        data-bs-target="#createGroupModal">
-                    Create Group
-                </button>
-                <button class="btn btn-secondary btn_group" data-bs-toggle="modal"
-                        data-bs-target="#addGroupModal">Add Group
+                {% if user.is_staff %}
+                    <button type="button" class="btn btn-primary btn-custom me-2" data-bs-toggle="modal"
+                            data-bs-target="#createGroupModal">
+                        Create Group
+                    </button>
+                {% endif %}
+                <button class="btn btn_close_modal" data-bs-toggle="modal"
+                        data-bs-target="#addGroupModal">Join Group
                 </button>
             </div>
         </div>
-        <div class="groups_container">
-            {% for group in groups %}
-                <div class="card group_card"
+
+        {% for group in groups %}
+            <div class="all_groups_container">
+                <div class="card base_card all_group_card"
                      onclick="window.location='{% url 'group:group_detail' group.id %}';">
                     <div class="card_content">
                         <div class="card_body">
@@ -29,21 +34,27 @@
                         </div>
                     </div>
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <div class="empty_state">
+            </div>
+        {% empty %}
+            <div class="d-flex justify-content-center align-items-center">
+                <div class="empty_state">
+                    {% if user.is_staff %}
+                        <i class="fas fa-users-slash fa-3x mb-3"></i>
+                        <p>No Groups Create yet</p>
+                    {% else %}
+                        <i class="fas fa-users-slash fa-3x mb-3"></i>
                         <p>No Groups Available</p>
-                    </div>
+                    {% endif %}
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
         <!-- Create Group Modal -->
         {% if request.user.is_staff %}
-            <div class="modal fade group_modal" id="createGroupModal" tabindex="-1"
+            <div class="modal fade base_modal" id="createGroupModal" tabindex="-1"
                  aria-labelledby="createGroupModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog ">
-                    <div class="modal-content group_modal_content">
+                    <div class="modal-content base_modal_content">
                         <div class="modal-header group_modal_header">
                             <h3 class="modal-title" id="createGroupModalLabel">Create New Group</h3>
                         </div>
@@ -51,23 +62,27 @@
                             {% csrf_token %}
                             <div class="modal-body">
                                 <div class="form-floating custom_form_floating form_group mb-3">
-                                    <input type="text" class="form-control custom_form_control" id="group_name" name="group_name"
-                                           placeholder="Group Name"
+                                    <i class="fa-solid fa-user-group form_icon"></i>
+                                    <input type="text" class="form-control custom_form_control" id="group_name"
+                                           name="group_name"
+                                           placeholder=""
                                            required="">
                                     <label for="group_name">Group Name</label>
                                 </div>
                                 <div class="form-floating custom_form_floating form_group mb-1">
-                                    <input class="form-control custom_form_control" id="group_description" name="group_description"
-                                           placeholder="Group Description"
+                                    <i class="fa-solid fa-file-waveform form_icon"></i>
+                                    <input class="form-control custom_form_control" id="group_description"
+                                           name="group_description"
+                                           placeholder=""
                                            required="">
                                     <label for="group_description" class="form-label">Description</label>
                                 </div>
                             </div>
                             <div class="modal-footer group_modal_footer">
-                                <button type="button" class="btn btn-secondary btn_group group_btn_secondary"
+                                <button type="button" class="btn btn_close_modal"
                                         data-bs-dismiss="modal">Close
                                 </button>
-                                <button type="submit" class="btn btn-primary btn_primary btn_group">Create Group
+                                <button type="submit" class="btn btn-primary btn-custom">Create Group
                                 </button>
                             </div>
                         </form>
@@ -75,57 +90,35 @@
                 </div>
             </div>
         {% endif %}
-        <!-- Add Group  -->
-        <div class="modal fade group_modal" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel"
+        <!-- Join Group  -->
+        <div class="modal fade base_modal" id="addGroupModal" tabindex="-1" aria-labelledby="addGroupModalLabel"
              aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content group_modal_content">
+                <div class="modal-content base_modal_content">
                     <div class="modal-header group_modal_header">
-                        <h3 class="modal-title" id="addGroupModalLabel">Add Group</h3>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h3 class="modal-title" id="addGroupModalLabel">Join Group</h3>
                     </div>
                     <form method="post" action="{% url 'group:add_group' %}">
                         {% csrf_token %}
                         <div class="modal-body">
-                            <div class="form-floating custom_form_floating form_group mb-1">
-                                <input id="AddGroup" name="group_code" type="text" class="form-control custom_form_control"
+                            <div class="form-floating form_group mb-1">
+                                <i class="fa-solid fa-code form_icon"></i>
+                                <input id="AddGroup" name="group_code" type="text"
+                                       class="form-control custom_form_control"
                                        placeholder="Username" required="">
                                 <label for="AddGroup">Enter Group Code</label>
                             </div>
                         </div>
                         <div class="modal-footer group_modal_footer">
-                            <button type="button" class="btn btn-secondary btn_group group_btn_secondary"
+                            <button type="button" class="btn btn_close_modal"
                                     data-bs-dismiss="modal">
                                 Close
                             </button>
-                            <button class="btn btn-primary btn_primary" type="submit">Join</button>
+                            <button class="btn btn-primary btn-custom" type="submit">Join</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block Script %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const createGroupModal = document.getElementById('createGroupModal');
-            createGroupModal.addEventListener('hidden.bs.modal', function () {
-                const form = createGroupModal.querySelector('form');
-                if (form) {
-                    form.reset();
-                }
-            });
-
-            const addGroupModal = document.getElementById('addGroupModal');
-            addGroupModal.addEventListener('hidden.bs.modal', function () {
-                const form = addGroupModal.querySelector('form');
-                if (form) {
-                    form.reset();
-                }
-            });
-        });
-
-    </script>
 {% endblock %}

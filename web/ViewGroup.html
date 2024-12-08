@@ -2,13 +2,100 @@
 {% load static %}
 {% block title %}{{ group.name }}{% endblock %}
 {% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/viewgroup.css' %}">
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"/>
-    <link rel="stylesheet" href="{% static 'css/group.css' %}">
+    <style>
+        /* Custom backdrop style */
+        #pdfUploadModal::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        /* Ensure modal is above other content */
+        #pdfUploadModal {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #pdfUploadModal .modal-content {
+            position: relative;
+            z-index: 1060;
+        }
+
+        /* Preview container styles */
+        #pdfPreviewContainer {
+            margin-bottom: 1rem;
+        }
+
+        /* Text preview styles */
+        .text-preview {
+            background: rgba(17, 24, 39, 0.95) !important;
+            color: rgba(255, 255, 255, 0.7) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Ratio container for PDF */
+        .ratio-16x9 {
+            max-height: 400px;
+        }
+
+        .search-input {
+            flex: 0;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 16px;
+            width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-button {
+            padding: 10px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+
+        .search-button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+    </style>
 {% endblock %}
 {% block content %}
+    <div class="animated_background bg_fi"></div>
     <div class="container mt-4">
-        <div class="card header_card mb-4 ">
+        <div class="base_card group_card mb-4 ">
             <div class="card-header p-4">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="group_info">
@@ -38,20 +125,22 @@
                                 <i class="fa-solid fa-eye me-2"></i>
                                 <span>View Scenario</span>
                             </a>
-                            <a href="{% url 'scenario:create_scenario' group.id %}" class="action_btn">
-                                <i class="fa-solid fa-plus me-2"></i>
-                                <span>Add Scenario</span>
-                            </a>
-                            <button type="button" class="action_btn" data-bs-toggle="modal"
-                                    data-bs-target="#editGroupModal">
-                                <i class="fa-regular fa-pen-to-square me-2"></i>
-                                <span>Edit Group</span>
-                            </button>
-                            <button type="button" class="action_btn" data-bs-toggle="modal"
-                                    data-bs-target="#addStudentModal">
-                                <i class="fa-solid fa-user-plus me-2"></i>
-                                <span>Add Students</span>
-                            </button>
+                            {% if request.user == group.staff %}
+                                <a href="{% url 'scenario:create_scenario' group.id %}" class="action_btn">
+                                    <i class="fa-solid fa-plus me-2"></i>
+                                    <span>Add Scenario</span>
+                                </a>
+                                <button type="button" class="action_btn" data-bs-toggle="modal"
+                                        data-bs-target="#editGroupModal">
+                                    <i class="fa-regular fa-pen-to-square me-2"></i>
+                                    <span>Edit Group</span>
+                                </button>
+                                <button type="button" class="action_btn" data-bs-toggle="modal"
+                                        data-bs-target="#addStudentModal">
+                                    <i class="fa-solid fa-user-plus me-2"></i>
+                                    <span>Add Students</span>
+                                </button>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="action_menu">
@@ -68,75 +157,80 @@
         <div class="row g-4">
             <div class="col-md-8">
                 {% if request.user.is_staff %}
-                    <div class="card mb-4 card_custom_view">
-                        <div class="card-body">
-                            <h5 class="card-title mb-4">
-                                <i class="fas fa-bullhorn me-2"></i>
-                                Make an Announcement
-                            </h5>
-                            <form method="post" action="{% url 'group:create_announcement' group.id %}"
-                                  enctype="multipart/form-data" id="announcementForm">
-                                {% csrf_token %}
-                                <div class="mb-3 mb-custom">
-                                    <label for="announcement_title" class="form-label">Title (optional)</label>
-                                    <input type="text" class="form-control control_custom" id="announcement_title"
-                                           name="title">
-                                </div>
-                                <div class="mb-3 mb-custom">
-                                    <label for="announcement_text" class="form-label">Announcement</label>
-                                    <textarea class="form-control control_custom" id="announcement_text"
-                                              name="announcement" rows="3"
-                                              required></textarea>
-                                </div>
-                                <div class="mb-3 d-flex align-items-center gap-2 mb-custom">
-                                    <button type="button" class="btn btn-outline-primary custom_cancel"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#pdfUploadModal">
-                                        <i class="fas fa-file me-2"></i>Attach File
+                    {% if request.user == group.staff %}
+                        <div class="base_card group_card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">
+                                    <i class="fas fa-bullhorn me-2"></i>
+                                    Make an Announcement
+                                </h5>
+                                <form method="post" action="{% url 'group:create_announcement' group.id %}"
+                                      enctype="multipart/form-data" id="announcementForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3 mb-custom">
+                                        <label for="announcement_title" class="form-label">Title (optional)</label>
+                                        <input type="text" class="form-control control_custom" id="announcement_title"
+                                               name="title">
+                                    </div>
+                                    <div class="mb-3 mb-custom">
+                                        <label for="announcement_text" class="form-label">Announcement</label>
+                                        <textarea class="form-control control_custom" id="announcement_text"
+                                                  name="announcement" rows="3"
+                                                  required></textarea>
+                                    </div>
+                                    <div class="mb-3 d-flex align-items-center gap-2 mb-custom">
+                                        <button type="button" class="btn btn-outline-primary custom_cancel"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#pdfUploadModal">
+                                            <i class="fas fa-file me-2"></i>Attach File
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary custom_cancel"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#linkModal">
+                                            <i class="fas fa-link me-2"></i>Add Link
+                                        </button>
+                                        <span id="selectedFileName" class="text-muted"></span>
+                                    </div>
+                                    <div id="selectedLinks" class="mb-3"></div>
+                                    <input type="file" id="pdf_file" name="pdf_file" accept=".pdf, .txt"
+                                           title="Please select PDF files only" class="d-none" multiple>
+                                    <button type="submit" class="btn btn-primary btn-custom">Post Announcement
                                     </button>
-                                    <button type="button" class="btn btn-outline-primary custom_cancel"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#linkModal">
-                                        <i class="fas fa-link me-2"></i>Add Link
-                                    </button>
-                                    <span id="selectedFileName" class="text-muted"></span>
-                                </div>
-                                <div id="selectedLinks" class="mb-3"></div>
-                                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf, .txt"
-                                       title="Please select PDF files only" class="d-none" multiple>
-                                <button type="submit" class="btn btn-primary btn_group_custom">Post Announcement
-                                </button>
-                            </form>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                 {% endif %}
 
                 <!-- PDF Upload Modal -->
-                <div class="modal fade" id="pdfUploadModal" tabindex="-1" aria-labelledby="pdfUploadModalLabel"
-                     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content custom_view">
-                            <div class="modal-header header_custom">
+                <div class="modal fade base_modal" id="pdfUploadModal" tabindex="-1"
+                     aria-labelledby="pdfUploadModalLabel"
+                     aria-hidden="true" data-bs-backdrop="false">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content base_modal_content">
+                            <div class="modal-header">
                                 <h5 class="modal-title" id="pdfUploadModalLabel">Upload File</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="mb-3 mb-custom">
+                                <div class="mb-3">
                                     <label for="pdfInput" class="form-label">Select PDF or TXT File</label>
-                                    <input type="file" class="form-control control_custom" id="pdfInput"
-                                           accept=".pdf,.txt">
+                                    <input type="file" class="form-control" id="pdfInput" accept=".pdf,.txt">
+                                    <div class="form-text">Supported formats: PDF, TXT</div>
                                 </div>
                                 <div id="pdfPreviewContainer" class="d-none">
                                     <h6 class="mb-2">Preview:</h6>
                                     <div class="ratio ratio-16x9">
-                                        <iframe id="pdfPreview" class="border rounded"></iframe>
+                                        <iframe id="pdfPreview" class="border rounded bg-light"></iframe>
                                     </div>
                                 </div>
                             </div>
                             <div class="modal-footer footer_custom">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" id="confirmPdfUpload">Confirm Upload
+                                <button type="button" class="btn btn_close_modal" data-bs-dismiss="modal">Cancel
+                                </button>
+                                <button type="button" class="btn btn-primary btn-custom" id="confirmPdfUpload">Confirm
+                                    Upload
                                 </button>
                             </div>
                         </div>
@@ -144,13 +238,13 @@
                 </div>
 
                 <!-- Rest of your announcements display code -->
-                <div class="announcements">
-                    <h3 class="mb-4">
+                <div class="title">
+                    <h3 class=" base_header base_title anoument_title mb-3">
                         <i class="fas fa-scroll me-2"></i>
                         Announcements
                     </h3>
                     {% for announcement in announcements %}
-                        <div class="card announcement_card mb-3 mb-custom  card_custom_view">
+                        <div class="base_card group_card announcement_card mb-3 mb-custom">
                             <div class="card-body">
                                 {% if announcement.title %}
                                     <h5 class="card-title">{{ announcement.title }}</h5>
@@ -176,7 +270,7 @@
                                 {% for link in announcement.links.all %}
                                     <div class="link-preview mt-2">
                                         <a href="{{ link.url }}" target="_blank" class="text-decoration-none">
-                                            <div class="card">
+                                            <div class="base_card group_card">
                                                 <div class="card-body">
                                                     <div class="d-flex align-items-center gap-2">
                                                         {% if link.favicon %}
@@ -188,14 +282,14 @@
                                                     {% if link.description %}
                                                         <p class="text-muted small mt-1 mb-0">{{ link.description }}</p>
                                                     {% endif %}
-                                                    <small class="text-muted">{{ link.domain }}</small>
+                                                    <small class="text-muted text_white">{{ link.domain }}</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </div>
                                 {% endfor %}
                                 <p class="card-text mt-3">
-                                    <small class="text-muted">
+                                    <small class="text-muted text_white">
                                         Posted by {{ announcement.created_by.username }}
                                     </small>
                                 </p>
@@ -212,31 +306,50 @@
 
             <!-- Right column for student list -->
             <div class="col-md-4">
-                <div class="card  card_custom_view">
+                <div class="base_card group_card">
                     <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>
-                            Students
-                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-users me-2"></i>Students
+                                </h5>
+                            </div>
+                            <form id="searchForm" method="GET" action="" class="search-container">
+                                <input type="text"
+                                       id="searchInput"
+                                       name="search"
+                                       class="search-input"
+                                       placeholder="Search username"
+                                       value="{{ request.GET.search|default:'' }}">
+                                <button type="submit" class="search-button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush" id="studentList">
-                            {% for student in group.students.all %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center student_item">
+                            {% for student in students %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span class="student-name">{{ student.username }}</span>
                                     <div>
                                         {% if request.user.is_staff %}
-                                            <form method="post"
-                                                  action="{% url 'group:remove_student' group.id student.id %}"
-                                                  style="display: inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                                            </form>
+                                            {% if request.user == group.staff %}
+                                                <form method="post"
+                                                      action="{% url 'group:remove_student' group.id student.id %}"
+                                                      style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                                </form>
+                                            {% endif %}
                                         {% endif %}
                                     </div>
                                 </li>
                             {% empty %}
-                                <li class="list-group-item">No students enrolled yet.</li>
+                                <li class="list-group-item empty-state view_empty_state">
+                                    <i class="fas fa-user-slash"></i>
+                                    <p>No students enrolled yet.</p>
+                                </li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -247,81 +360,108 @@
 
     <!-- Add Student Modal -->
     {% if request.user.is_staff %}
-        <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
-             aria-hidden="true">
-            <input type="hidden" id="searchStudentsUrl" value="{% url 'group:search_students' group.id %}">
-            <div class="modal-dialog">
-                <div class="modal-content custom_view">
-                    <div class="modal-header header_custom">
-                        <h5 class="modal-title" id="addStudentModalLabel">Add Students</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% if request.user == group.staff %}
+            <div class="modal fade base_modal" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
+                 aria-hidden="true">
+                <input type="hidden" id="searchStudentsUrl" value="{% url 'group:search_students' group.id %}">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content base_modal_content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addStudentModalLabel">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Add Students to Group
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{% url 'group:add_students' group.id %}" id="addStudentsForm">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-4">
+                                    <label for="studentSelect" class="form-label">
+                                        <i class="fas fa-search me-2"></i>
+                                        Search and Select Students
+                                    </label>
+                                    <select class="form-select custom-select" id="studentSelect" name="student_ids"
+                                            multiple>
+                                    </select>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Type to search for students by name or email
+                                    </small>
+                                </div>
+
+                                <div id="selectedStudents" class="selected-students-container">
+                                    <!-- Selected students will appear here -->
+                                </div>
+                            </div>
+                            <div class="modal-footer footer_custom">
+                                <button type="button" class="btn btn_close_modal" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-custom">
+                                    <i class="fas fa-user-plus me-2"></i>Add Selected Students
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <form method="post" action="{% url 'group:add_students' group.id %}">
-                        {% csrf_token %}
-                        <div class="modal-body">
-                            <div class="form-floating mb-3 mb-custom">
-                                <select class="form-select" id="studentSelect" name="student_ids" multiple>
-                                </select>
-                            </div>
-                            <div id="selectedStudents" class="mb-3 mb-custom">
-                            </div>
-                        </div>
-                        <div class="modal-footer footer_custom">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary btn_group_custom">Add Selected Students
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+        {% endif %}
     {% endif %}
 
     <!-- Add Edit Group Modal at the bottom of the file -->
     {% if request.user.is_staff %}
-        <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content custom_view">
-                    <div class="modal-header header_custom">
-                        <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% if request.user == group.staff %}
+            <div class="modal fade base_modal" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content base_modal_content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editGroupModalLabel">Edit Group Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{% url 'group:edit_group' group.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-3 mb-custom">
+                                    <label for="group_name" class="form-label">Group Name</label>
+                                    <input type="text" class="form-control control_custom" id="group_name"
+                                           name="group_name"
+                                           value="{{ group.name }}" required>
+                                </div>
+                                <div class="mb-3 mb-custom">
+                                    <label for="group_description" class="form-label">Group Description</label>
+                                    <textarea class="form-control control_custom" id="group_description"
+                                              name="group_description" rows="3"
+                                              required>{{ group.description }}</textarea>
+                                </div>
+                                <div class="mb-3 mb-custom">
+                                    <label class="form-label">Group Code</label>
+                                    <div class="code-display p-3 rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <code class="fs-5 text-primary">{{ group.code }}</code>
+                                            <small class="text-muted ms-3">Cannot be changed</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer footer_custom">
+                                <button type="button" class="btn btn_close_modal" data-bs-dismiss="modal">Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-custom">Save Changes</button>
+                            </div>
+                        </form>
                     </div>
-                    <form method="post" action="{% url 'group:edit_group' group.id %}">
-                        {% csrf_token %}
-                        <div class="modal-body">
-                            <div class="mb-3 mb-custom">
-                                <label for="group_name" class="form-label">Group Name</label>
-                                <input type="text" class="form-control control_custom" id="group_name" name="group_name"
-                                       value="{{ group.name }}" required>
-                            </div>
-                            <div class="mb-3 mb-custom">
-                                <label for="group_description" class="form-label">Group Description</label>
-                                <textarea class="form-control control_custom" id="group_description"
-                                          name="group_description" rows="3"
-                                          required>{{ group.description }}</textarea>
-                            </div>
-                            <div class="mb-3 mb-custom">
-                                <label class="form-label">Group Code</label>
-                                <p class="form-control-plaintext control_custom">{{ group.code }}</p>
-                                <small class="text-muted">Group code cannot be changed</small>
-                            </div>
-                        </div>
-                        <div class="modal-footer footer_custom">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary btn_group_custom">Save Changes</button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+        {% endif %}
     {% endif %}
 
     <!-- Link Modal -->
-    <div class="modal fade" id="linkModal" tabindex="-1" aria-labelledby="linkModalLabel" aria-hidden="true">
+    <div class="modal fade base_modal" id="linkModal" tabindex="-1" aria-labelledby="linkModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content custom_view">
-                <div class="modal-header header_custom">
+            <div class="modal-content base_modal_content">
+                <div class="modal-header">
                     <h5 class="modal-title" id="linkModalLabel">Add Link</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -332,7 +472,7 @@
                                placeholder="https://" required>
                     </div>
                     <div id="linkPreview" class="d-none">
-                        <div class="card">
+                        <div class="base_card group_card">
                             <div class="card-body">
                                 <div class="d-flex align-items-center gap-2">
                                     <img id="linkFavicon" class="favicon" width="16" height="16" alt="" src="">
@@ -435,11 +575,16 @@
                 reader.onload = function (e) {
                     // Create a pre element for text display
                     const textPreview = document.createElement('pre');
-                    textPreview.className = 'text-preview p-3 bg-light border rounded';
+                    textPreview.className = 'text-preview p-3 rounded';
                     textPreview.style.maxHeight = '400px';
                     textPreview.style.overflow = 'auto';
                     textPreview.style.whiteSpace = 'pre-wrap';
                     textPreview.style.wordWrap = 'break-word';
+                    textPreview.style.background = 'rgba(17, 24, 39, 0.95)';
+                    textPreview.style.color = 'rgba(255, 255, 255, 0.7)';
+                    textPreview.style.fontFamily = 'Consolas, monospace';
+                    textPreview.style.fontSize = '0.9rem';
+                    textPreview.style.lineHeight = '1.6';
                     textPreview.textContent = e.target.result;
 
                     // Clear existing preview content
@@ -647,7 +792,7 @@
                     linkPreviewItem.dataset.domain = domain;
 
                     linkPreviewItem.innerHTML = `
-                        <div class="card">
+                        <div class="base_card group_card">
                             <div class="card-body">
                                 <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-link"
                                         aria-label="Remove link"></button>

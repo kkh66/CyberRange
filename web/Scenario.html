@@ -1,84 +1,160 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
 
+        .header-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .page-title i {
+            margin-right: 0.5rem;
+            color: #3b82f6;
+        }
+
+        .subtitle {
+            width: 100%;
+            color: #94a3b8;
+            margin: 0.5rem 0;
+        }
+
+        .back-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .back-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .date-badge {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+
+        .meta-item i {
+            margin-right: 0.5rem;
+        }
+
+        .start-button {
+            display: block;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+        }
+
+        .start-button i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .back-button {
+                margin-top: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
 {% block content %}
-    <div class="container py-5">
-        <!-- Header with back button -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="display-6 mb-0">
-                    <i class="fas fa-laptop-code me-2"></i>
-                    {{ group.name }} Scenarios
-                </h2>
-                <p class="text-muted mt-2">View all scenarios in this group</p>
-            </div>
-            <div>
-                <a href="{% url 'group:group_detail' group.id %}" class="btn btn-outline-primary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Group
-                </a>
-            </div>
+    <div class="animated_background bg_fi"></div>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h2 class="page-title">
+                <i class="fas fa-laptop-code"></i>
+                {{ group.name }} Scenarios<br>
+                <span class="subtitle">View all scenarios in this group</span>
+            </h2>
+
+            <a href="{% url 'group:group_detail' group.id %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Group
+            </a>
         </div>
 
-        <!-- Scenario cards -->
+        <!-- Scenario Grid -->
         {% if group_scenarios %}
-            <div class="row g-4">
+            <div class="scenario-grid">
                 {% for group_scenario in group_scenarios %}
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow hover-card rounded-3 bg-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <h5 class="card-title mb-0">{{ group_scenario.scenario.name }}</h5>
-                                    <span class="badge bg-primary">{{ group_scenario.created_at|date:"M d, Y" }}</span>
-                                </div>
-                                <p class="card-text">{{ group_scenario.scenario.description }}</p>
-                                <div class="meta-info">
-                                    <small class="text-muted">
-                                        <i class="fa-brands fa-docker me-2"></i>
-                                        {{ group_scenario.scenario.docker_name }}
-                                    </small>
-                                    <small class="text-muted ms-3">
-                                        <i class="fas fa-clock me-2"></i>
-                                        Time Limit: {{ group_scenario.scenario.time_limit }} minutes
-                                    </small>
-                                </div>
+                    <div class="base_card scenario_card">
+                        <div class="card-content">
+                            <div class="base_header d-flex justify-content-between align-items-start mb-3">
+                                <h3>{{ group_scenario.scenario.name }}</h3>
+                                <span class="date-badge">{{ group_scenario.created_at|date:"M d, Y" }}</span>
                             </div>
-                            <div class="card-footer bg-transparent">
-                                <a href="{% url 'scenario:start_scenario' group_scenario.scenario.id %}"
-                                   class="btn btn-success btn-sm w-100">
-                                    <i class="fas fa-play me-1"></i>Start Scenario
-                                </a>
+
+                            <div class="info_use">
+                                <small>
+                                    <i class="fa-brands fa-docker me-2"></i>
+                                    {{ group_scenario.scenario.docker_name }}
+                                </small>
                             </div>
                         </div>
+
+                        <a href="{% url 'tutorial:ViewTutorial' group_scenario.scenario.id %}"
+                           class="start-button">
+                            <i class="fas fa-play"></i>
+                            Start Scenario
+                        </a>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <div class="row min-vh-50 align-items-center justify-content-center">
-                <div class="col-md-6">
-                    <div class="card text-center p-5 shadow bg-white rounded-3">
-                        <div class="card-body">
-                            <i class="fas fa-info-circle fa-3x text-info mb-4"></i>
-                            <h4 class="card-title mb-3">No Scenarios Available</h4>
-                            <p class="card-text text-muted">No scenarios available in this group yet.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="empty_state">
+                <i class="fas fa-info-circle group_empty"></i>
+                <h4>No Scenarios Available</h4>
+                <p>No scenarios available in this group yet.</p>
             </div>
         {% endif %}
     </div>
-
-    <style>
-        .hover-card {
-            transition: all 0.3s ease;
-        }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .meta-info {
-            margin-top: auto;
-            padding-top: 1rem;
-        }
-    </style>
 {% endblock %}

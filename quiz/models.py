@@ -1,28 +1,14 @@
-from django.contrib.auth.models import User
 from django.db import models
-from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import User
 from scenario.models import Scenario
-
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
     scenario = models.OneToOneField(Scenario, on_delete=models.CASCADE, related_name='quiz')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def clean(self):
-        if not self.pk and Quiz.objects.filter(scenario=self.scenario).exists():
-            raise ValidationError('A quiz already exists for this scenario.')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        if not self.title:
-            self.title = f"Quiz for {self.scenario.name}"
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.title
-
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
@@ -37,7 +23,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text[:50]
-
 
 class QuizAttempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
