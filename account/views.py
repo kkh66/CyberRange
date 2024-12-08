@@ -11,16 +11,39 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.utils.html import strip_tags
 from CyberRange.utils import generate_code
-from .models import PasswordResetRequest, StaffActivationPin, UserActivationPin
+from .models import PasswordResetRequest, StaffActivationPin, UserActivationPin, LoginAttempt
 from django.contrib.auth.decorators import login_required, user_passes_test
-from axes.handlers.proxy import AxesProxyHandler
-from axes.backends import AxesBackend
+from django.db.models import Q
+
+
+def check_password_case(password):
+    # Check if password has at least one uppercase letter
+    has_uppercase = any(char.isupper() for char in password)
+
+    # Check if password has at least one lowercase letter
+    has_lowercase = any(char.islower() for char in password)
+
+    # Return True if both uppercase and lowercase are present
+    return has_uppercase and has_lowercase
+
+
+def check_password_numeric_and_symbols(password):
+    # Check if password has at least one numeric character
+    has_numeric = any(char.isdigit() for char in password)
+
+    # Check if password has at least one special symbol
+    has_symbols = any(not char.isalnum() for char in password)
+
+    # Return True if both numeric and symbols are present
+    return has_numeric and has_symbols
 
 
 # Student Functions
 def register(request):
     if request.user.is_authenticated:
-        return redirect('console')
+        return redirect('scenario:console')
+
+    context = {}
     if request.method == 'POST':
         username = request.POST['username']
         password1 = request.POST['password1']
@@ -28,37 +51,71 @@ def register(request):
         email = request.POST['email']
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
+
+        context = {
+            'username': username,
+            'email': email,
+            'first_name': first_name,
+            'last_name': last_name
+        }
+
+        if not (7 <= len(username) <= 30):
+            messages.error(request, 'Username must be between 7 and 20 characters')
+            return render(request, 'Register.html', context)
+
+        if not check_password_case(password1):
+            messages.error(request, 'Password must contain both uppercase and lowercase letters')
+            return render(request, 'Register.html', context)
+
+        if not check_password_case(password2):
+            messages.error(request, 'Password must contain both uppercase and lowercase letters')
+            return render(request, 'Register.html', context)
+
+        if not check_password_numeric_and_symbols(password1):
+            messages.error(request, 'Password must contain numeric and special characters')
+            return render(request, 'Register.html', context)
+
+        if not check_password_numeric_and_symbols(password2):
+            messages.error(request, 'Password must contain numeric and special characters')
+            return render(request, 'Register.html', context)
+
+        try:
+            validate_password(password1)
+        except ValidationError as e:
+            messages.error(request, ', '.join(e.messages))
+            return render(request, 'Register.html', context)
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists, choose another one')
+            return render(request, 'Register.html', context)
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists, choose another one')
+            return render(request, 'Register.html', context)
+
         if password1 == password2:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'Username already exists, choose another one')
-                return redirect('account:register')
-            else:
-                if User.objects.filter(email=email).exists():
-                    messages.error(request, 'Email already exists, choose another one')
-                    return redirect('account:register')
-                else:
-                    try:
-                        validate_password(password1)
-                        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
-                                                        email=email, password=password1, is_active='False')
-                        pin = generate_code()
-                        expires_at = timezone.now() + timezone.timedelta(minutes=15)
-                        UserActivationPin.objects.create(user=user, pin=pin, expires_at=expires_at)
-                        send_mail(
-                            'Activate your account',
-                            f'Please input the the code to active the code {pin} ',
-                            'lee',
-                            [user.email],
-                        )
-                        messages.success(request, "Registration Successful. Please check your email")
-                        return redirect('account:activate_user')
-                    except ValidationError as e:
-                        messages.error(request, ', '.join(e.messages))
-                        return redirect('account:register')
+            try:
+                user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
+                                                email=email, password=password1, is_active='False')
+                pin = generate_code()
+                expires_at = timezone.now() + timezone.timedelta(minutes=15)
+                UserActivationPin.objects.create(user=user, pin=pin, expires_at=expires_at)
+                send_mail(
+                    'Activate your account',
+                    f'Please input the the code to active the code {pin} ',
+                    'lee',
+                    [user.email],
+                )
+                messages.success(request, "Registration Successful. Please check your email")
+                return redirect('account:activate_user')
+            except ValidationError as e:
+                messages.error(request, ', '.join(e.messages))
+                return render(request, 'Register.html', context)
         else:
-            return redirect('account:register')
+            messages.error(request, 'Passwords do not match')
+            return render(request, 'Register.html', context)
     else:
-        return render(request, 'Register.html')
+        return render(request, 'Register.html', context)
 
 
 def activate_user(request):
@@ -82,50 +139,61 @@ def activate_user(request):
     return render(request, 'ActiveAccount.html')
 
 
-class CustomAxesBackend(AxesBackend):
-    def get_lockout_response(self, request, credentials):
-        messages.error(
-            request,
-            'This account has been locked due to too many failed attempts. '
-            'Please try again after 24 hours.'
-        )
-        return render(request, 'Login.html')
-
-
 def login(request):
     if request.user.is_authenticated:
         return redirect('scenario:console')
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        
-        handler = AxesProxyHandler()
-        
-        if handler.is_locked(request):
-            messages.error(
-                request,
-                'This account has been locked due to too many failed attempts. '
-                'Please try again after 24 hours.'
-            )
-            return render(request, 'Login.html')
 
-        user = auth.authenticate(request=request, username=username, password=password)
-        
-        if user is not None:
-            auth.login(request, user)
-            messages.success(request, 'You have successfully logged in.')
-            return redirect('scenario:console')
-        else:
-            failures = handler.get_failures(request)
-            attempts_remaining = 3 - failures 
-            
-            if attempts_remaining > 0:
-                messages.warning(
+        context = {
+            'username': username,
+        }
+
+        try:
+            user = User.objects.get(username=username)
+            if not user.is_active:
+                messages.error(
                     request,
-                    f'Invalid login credentials. {attempts_remaining} attempts remaining before account lockout.'
+                    'Your account has been deactivated due to too many failed attempts. '
+                    'Please Input Your Username to Request Activation.'
                 )
-            return render(request, 'Login.html')
-            
+                return redirect('account:RequestActivation')
+
+            user_auth = auth.authenticate(request=request, username=username, password=password)
+
+            if user_auth is not None:
+                auth.login(request, user_auth)
+                LoginAttempt.clear_attempts(user)
+                messages.success(request, 'You have successfully logged in.')
+                return redirect('scenario:console')
+            else:
+                LoginAttempt.add_failed_attempt(user)
+                failed_attempts = LoginAttempt.get_failed_attempts(user)
+
+                if failed_attempts >= LoginAttempt.MAX_ATTEMPTS:
+                    user.is_active = False
+                    user.save()
+                    LoginAttempt.clear_attempts(user)
+                    messages.error(
+                        request,
+                        'Your account has been deactivated due to too many failed attempts. '
+                        'Please Reactivate your account.'
+                    )
+                    return redirect('account:ReactivateAccount')
+                else:
+                    attempts_remaining = LoginAttempt.MAX_ATTEMPTS - failed_attempts
+                    messages.warning(
+                        request,
+                        f'Invalid login credentials. {attempts_remaining} attempts remaining before account deactivation.'
+                    )
+                return render(request, 'Login.html', context)
+
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid username or password.')
+            return render(request, 'Login.html', context)
+
     return render(request, 'Login.html')
 
 
@@ -135,11 +203,11 @@ def request_password_reset(request):
         try:
             user = User.objects.get(username=username)
             pin = generate_code()
-            expires_at = timezone.now() + datetime.timedelta(minutes=1)
+            expires_at = timezone.now() + datetime.timedelta(minutes=15)
             reset_request = PasswordResetRequest.objects.create(user=user, pin=pin, expires_at=expires_at)
             send_mail(
                 'Password Reset PIN',
-                f'Your PIN is: {pin}. It will expire in 1 minutes.',
+                f'Your PIN is: {pin}. It will expire in 15 minutes.',
                 'lee',
                 [user.email],
             )
@@ -158,26 +226,46 @@ def confirm_pin(request):
         new_password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         try:
-            if confirm_password == new_password:
-                reset_request = PasswordResetRequest.objects.get(user__username=username, pin=pin, used=False)
-                if reset_request.is_valid():
-                    user = reset_request.user
-                    user.set_password(new_password)
-                    user.save()
-                    reset_request.used = True
-                    reset_request.save()
-                    update_session_auth_hash(request, user)
-                    messages.success(request, "Password reset complete. Please login again.")
-                    return redirect('account:login')
-                else:
-                    messages.error(request, 'Invalid or expired PIN')
-                    return render(request, 'ConfirmPassword.html')
+            if not check_password_case(new_password):
+                messages.error(request, 'Password must contain both uppercase and lowercase letters')
+                return redirect('account:confirm_pin')
+
+            if not check_password_case(confirm_password):
+                messages.error(request, 'Password must contain both uppercase and lowercase letters')
+                return redirect('account:confirm_pin')
+
+            if not check_password_numeric_and_symbols(new_password):
+                messages.error(request, 'Password must contain numeric and special characters')
+                return redirect('account:confirm_pin')
+
+            if not check_password_numeric_and_symbols(confirm_password):
+                messages.error(request, 'Password must contain numeric and special characters')
+                return redirect('account:confirm_pin')
+
+            try:
+                validate_password(new_password)
+            except ValidationError as e:
+                messages.error(request, ', '.join(e.messages))
+                return redirect('account:confirm_pin')
+
+            if new_password != confirm_password:
+                messages.error(request, 'Passwords do not match')
+                return redirect('account:confirm_pin')
+
+            reset_request = PasswordResetRequest.objects.get(user__username=username, pin=pin, used=False)
+            if reset_request.is_valid():
+                user = reset_request.user
+                user.set_password(new_password)
+                user.save()
+                reset_request.used = True
+                reset_request.save()
+                messages.success(request, 'Your password has been reset successfully. You can now login.')
+                return redirect('account:login')
             else:
-                messages.error(request, 'Confirm password and password not same')
-                return render(request, 'ConfirmPassword.html')
+                messages.error(request, 'Invalid or expired PIN')
         except PasswordResetRequest.DoesNotExist:
-            messages.error(request, 'Invalid PIN or username')
-            return render(request, 'ConfirmPassword.html')
+            messages.error(request, 'Invalid username or PIN')
+
     return render(request, 'ConfirmPassword.html')
 
 
@@ -187,12 +275,8 @@ def logout_use(request):
     return redirect('account:login')
 
 
-def is_superuser(user):
-    return user.is_superuser
-
-
 @login_required
-@user_passes_test(is_superuser)
+@user_passes_test(lambda u: u.is_superuser)
 def register_instructor(request):
     if request.method == 'POST':
         username = request.POST['staff_username']
@@ -201,6 +285,21 @@ def register_instructor(request):
         email = request.POST['staff_email']
         first_name = request.POST['staff_first_name']
         last_name = request.POST['staff_last_name']
+
+        if not check_password_case(password):
+            messages.error(request, 'Password must contain both uppercase and lowercase letters')
+            return redirect('account:register_Instructor')
+
+        if not check_password_case(confirm_password):
+            messages.error(request, 'Password must contain both uppercase and lowercase letters')
+            return redirect('account:register_Instructor')
+
+        if not check_password_numeric_and_symbols(password):
+            messages.error(request, 'Password must contain numeric and special characters')
+            return redirect('account:register_Instructor')
+        if not check_password_numeric_and_symbols(confirm_password):
+            messages.error(request, 'Password must contain numeric and special characters')
+            return redirect('account:register_Instructor')
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match')
@@ -279,15 +378,24 @@ def activate_instructor(request):
     return render(request, 'Admin/ActiveInstructor.html')
 
 
-@user_passes_test(is_superuser)
+@user_passes_test(lambda u: u.is_superuser)
 def instructor_list(request):
+    search_query = request.GET.get('search', '').strip()
     staff_members = User.objects.filter(is_staff=True).exclude(is_superuser=True)
+
+    if search_query:
+        staff_members = staff_members.filter(
+            Q(username__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
     context = {
-        'staff_members': staff_members
+        'staff_members': staff_members,
     }
-    return render(request, 'admin/InstructorList.html', context)
+    return render(request, 'Admin/InstructorList.html', context)
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def btn_instructor_status(request, user_id):
     staff_member = get_object_or_404(User, id=user_id, is_staff=True)
     staff_member.is_active = not staff_member.is_active
@@ -299,3 +407,56 @@ def btn_instructor_status(request, user_id):
 
 def handler404(request, exception):
     return render(request, '404.html')
+
+
+def reactivate_account(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        pin = request.POST.get('pin')
+
+        try:
+            user = User.objects.get(username=username)
+            activation = UserActivationPin.objects.get(user=user, pin=pin)
+
+            if activation.is_valid():
+                user.is_active = True
+                user.save()
+                LoginAttempt.clear_attempts(user)  # Clear failed attempts
+                activation.delete()
+                messages.success(request, "Your account has been successfully reactivated. You can now log in.")
+                return redirect('account:login')
+            else:
+                messages.error(request, "Invalid or expired PIN. Please request a new one.")
+        except (User.DoesNotExist, UserActivationPin.DoesNotExist):
+            messages.error(request, "Invalid username or PIN.")
+
+    return render(request, 'ReActive.html')
+
+
+def request_reactivation(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        try:
+            user = User.objects.get(username=username)
+            if not user.is_active:
+                # Generate and save activation pin
+                pin = generate_code()
+                expires_at = timezone.now() + timezone.timedelta(minutes=15)
+                UserActivationPin.objects.filter(user=user).delete()
+                UserActivationPin.objects.create(user=user, pin=pin, expires_at=expires_at)
+
+                # Send email with activation pin
+                send_mail(
+                    'Reactivate your account',
+                    f'Your account reactivation PIN is: {pin}',
+                    'lee',
+                    [user.email],
+                )
+                messages.success(request, "A reactivation PIN has been sent to your email.")
+                return redirect('account:ReactivateAccount')
+            else:
+                messages.error(request, "This account is already active.")
+        except User.DoesNotExist:
+            messages.error(request, "No account found with this username.")
+
+    return render(request, 'RequestReactive.html')

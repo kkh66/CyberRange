@@ -1,53 +1,56 @@
+import random
+import json
+
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Quiz, Question, QuizAttempt
-from scenario.models import Scenario
-import json
-from django.contrib.auth.decorators import login_required
+from scenario.models import Scenario, UserScenario
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.utils import timezone
-from scenario.utils import DockerManager
-from scenario.models import UserScenario
 from django.http import JsonResponse
 from django.urls import reverse
 
 
-# Quiz CRUD
+def create_question(quiz, question_data, q_num):
+    return Question.objects.create(
+        quiz=quiz,
+        question_text=question_data.get(f'questions[{q_num}][question_text]'),
+        option_a=question_data.get(f'questions[{q_num}][option_a]'),
+        option_b=question_data.get(f'questions[{q_num}][option_b]'),
+        option_c=question_data.get(f'questions[{q_num}][option_c]'),
+        option_d=question_data.get(f'questions[{q_num}][option_d]'),
+        correct_option=question_data.get(f'questions[{q_num}][correct_option]')
+    )
+
+
+def process_questions(quiz, post_data):
+    questions_data = post_data.items()
+    for key, _ in questions_data:
+        if key.startswith('questions[') and key.endswith('][question_text]'):
+            q_num = key.split('[')[1].split(']')[0]
+            create_question(quiz, post_data, q_num)
+
+
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def create_quiz(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
 
     if hasattr(scenario, 'quiz'):
-        messages.warning(request, 'A quiz already exists for this scenario.')
         return redirect('quiz:ListQuiz', scenario_id=scenario.id)
 
     if request.method == 'POST':
         try:
             quiz = Quiz.objects.create(
                 scenario=scenario,
-                title=request.POST.get('title')
+                title=request.POST.get('title', f'Quiz for {scenario.name}')
             )
-
-            questions_data = request.POST.items()
-            for key, value in questions_data:
-                if key.startswith('questions[') and key.endswith('][question_text]'):
-                    q_num = key.split('[')[1].split(']')[0]
-                    print(f"Creating question {q_num}")
-                    Question.objects.create(
-                        quiz=quiz,
-                        question_text=request.POST.get(f'questions[{q_num}][question_text]'),
-                        option_a=request.POST.get(f'questions[{q_num}][option_a]'),
-                        option_b=request.POST.get(f'questions[{q_num}][option_b]'),
-                        option_c=request.POST.get(f'questions[{q_num}][option_c]'),
-                        option_d=request.POST.get(f'questions[{q_num}][option_d]'),
-                        correct_option=request.POST.get(f'questions[{q_num}][correct_option]')
-                    )
-
+            process_questions(quiz, request.POST)
             messages.success(request, 'Quiz created successfully!')
             return redirect('quiz:ListQuiz', scenario_id=scenario.id)
 
         except Exception as e:
             messages.error(request, f'Error creating quiz: {str(e)}')
-            return redirect('quiz:ListQuiz', scenario_id=scenario.id)
+            return redirect('quiz:CreateQuiz', scenario_id=scenario.id)
 
     return render(request, 'Instructor/quiz/AddQuiz.html', {
         'scenario': scenario
@@ -55,13 +58,14 @@ def create_quiz(request, scenario_id):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def quiz_list(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
     try:
         quiz = Quiz.objects.get(scenario=scenario)
     except Quiz.DoesNotExist:
         quiz = None
-    
+
     return render(request, 'Instructor/quiz/ListQuizz.html', {
         'quiz': quiz,
         'scenario': scenario
@@ -69,6 +73,7 @@ def quiz_list(request, scenario_id):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def quiz_delete(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
     quiz = get_object_or_404(Quiz, scenario=scenario)
@@ -77,112 +82,55 @@ def quiz_delete(request, scenario_id):
     return redirect('quiz:ListQuiz', scenario_id=scenario_id)
 
 
-# View Tutorial
-def list_tutorial(request):
-    return render(request, 'Tutorial.html')
-
-
 @login_required
 def take_quiz(request, scenario_id):
-    scenario = get_object_or_404(Scenario, id=scenario_id)
-    quiz = get_object_or_404(Quiz, scenario=scenario)
+    quiz = get_object_or_404(Quiz, scenario_id=scenario_id)
 
-    if request.method == 'POST':
-        try:
-            score = int(request.POST.get('score', 0))
-            total_questions = int(request.POST.get('total_questions', 0))
+    existing_attempt = QuizAttempt.objects.filter(
+        user=request.user,
+        quiz=quiz
+    ).first()
 
-            QuizAttempt.objects.create(
-                user=request.user,
-                quiz=quiz,
-                score=score,
-                total_questions=total_questions
-            )
+    if existing_attempt:
+        messages.info(request, 'You have already completed this quiz.')
+        return redirect('scenario:scenario_detail', scenario_id=scenario_id)
 
-            user_scenario = UserScenario.objects.filter(
-                scenario=scenario,
-                user=request.user
-            ).order_by('-id').first()
+    questions = []
+    all_questions = list(quiz.questions.all())
+    random.shuffle(all_questions)
 
-            if user_scenario and user_scenario.container_id:
-                docker_manager = DockerManager()
-                try:
-                    docker_manager.stop_container(user_scenario.container_id)
-                    docker_manager.remove_container(user_scenario.container_id)
-                    user_scenario.container_id = None
-                    user_scenario.completed_at = timezone.now()
-                    user_scenario.save()
-                except Exception as e:
-                    print(f"Error cleaning up container: {e}")
-
-            group_scenario = scenario.groups.first()
-            if group_scenario:
-                group_id = group_scenario.group.id
-                list_url = reverse('scenario:scenario_list', args=[group_id])
-            else:
-                list_url = reverse('scenario:list_all_scenarios')
-
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Quiz completed successfully!',
-                'scenario_id': scenario_id,
-                'rate_url': reverse('scenario:rate_scenario', args=[scenario_id]),
-                'list_url': list_url
-            })
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=500)
-
-    questions = quiz.questions.all()
-    questions_data = []
-    for q in questions:
-        questions_data.append({
+    for q in all_questions:
+        questions.append({
             'question_text': q.question_text,
-            'option_a': q.option_a,
-            'option_b': q.option_b,
-            'option_c': q.option_c,
-            'option_d': q.option_d,
-            'correct_option': q.correct_option
+            'answers': [q.option_a, q.option_b, q.option_c, q.option_d],
+            'correct_answer': getattr(q, f'option_{q.correct_option.lower()}')
         })
 
-    return render(request, 'Quiz.html', {
+    context = {
+        'scenario': quiz.scenario,
         'quiz': quiz,
-        'questions': json.dumps(questions_data),
-        'scenario': scenario
-    })
+        'questions': questions,
+        'urls': {
+            'SubmitQuiz': reverse('quiz:SubmitQuiz', args=[scenario_id]),
+            'rate_scenario': reverse('rating:RateContent', args=[scenario_id]),
+            'scenario_detail': reverse('scenario:scenario_detail', args=[scenario_id])
+        }
+    }
+    return render(request, 'Quiz.html', context)
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def edit_quiz(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
     quiz = get_object_or_404(Quiz, scenario=scenario)
 
     if request.method == 'POST':
         try:
-            # Update quiz title
             quiz.title = request.POST.get('title')
             quiz.save()
-
-            # Delete existing questions
             quiz.questions.all().delete()
-
-            # Create new questions
-            questions_data = request.POST.items()
-            for key, value in questions_data:
-                if key.startswith('questions[') and key.endswith('][question_text]'):
-                    q_num = key.split('[')[1].split(']')[0]
-                    Question.objects.create(
-                        quiz=quiz,
-                        question_text=request.POST.get(f'questions[{q_num}][question_text]'),
-                        option_a=request.POST.get(f'questions[{q_num}][option_a]'),
-                        option_b=request.POST.get(f'questions[{q_num}][option_b]'),
-                        option_c=request.POST.get(f'questions[{q_num}][option_c]'),
-                        option_d=request.POST.get(f'questions[{q_num}][option_d]'),
-                        correct_option=request.POST.get(f'questions[{q_num}][correct_option]')
-                    )
-
+            process_questions(quiz, request.POST)
             messages.success(request, 'Quiz updated successfully!')
             return redirect('quiz:ListQuiz', scenario_id=scenario.id)
 
@@ -194,3 +142,83 @@ def edit_quiz(request, scenario_id):
         'quiz': quiz,
         'scenario': scenario
     })
+
+
+@login_required
+def submit_quiz(request, scenario_id):
+    if request.method == 'POST':
+        try:
+            quiz = get_object_or_404(Quiz, scenario_id=scenario_id)
+
+            existing_attempt = QuizAttempt.objects.filter(
+                user=request.user,
+                quiz=quiz
+            ).first()
+
+            if existing_attempt:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'You have already submitted this quiz.'
+                }, status=400)
+
+            data = json.loads(request.body)
+            score = data.get('score')
+            total_questions = data.get('total_questions')
+
+            # Create quiz attempt
+            QuizAttempt.objects.create(
+                user=request.user,
+                quiz=quiz,
+                score=score,
+                total_questions=total_questions
+            )
+
+            user_scenario = UserScenario.objects.filter(
+                scenario_id=scenario_id,
+                user=request.user,
+                container_id__isnull=False
+            ).order_by('-id').first()
+
+            if user_scenario and user_scenario.container_id:
+                try:
+                    from scenario.utils import DockerManager
+                    docker_manager = DockerManager()
+                    docker_manager.stop_container(user_scenario.container_id)
+                except Exception as e:
+                    print(f"Error stopping container: {e}")
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Quiz submitted successfully'
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=400)
+
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method'
+    }, status=405)
+
+
+@login_required
+def check_completion(request, scenario_id):
+    try:
+        quiz = get_object_or_404(Quiz, scenario_id=scenario_id)
+        quiz_attempt = QuizAttempt.objects.filter(
+            user=request.user,
+            quiz=quiz
+        ).exists()
+
+        return JsonResponse({
+            'completed': quiz_attempt,
+            'quiz_url': reverse('quiz:TakeQuiz', args=[scenario_id]) if not quiz_attempt else None
+        })
+    except Quiz.DoesNotExist:
+        return JsonResponse({
+            'completed': True,
+            'quiz_url': None
+        })

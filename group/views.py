@@ -1,6 +1,4 @@
 import os
-
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
@@ -31,9 +29,10 @@ def group_list(request):
     return render(request, 'Group.html', {'groups': groups})
 
 
+@login_required
 @user_passes_test(lambda u: u.is_staff)
 def create_group(request):
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_staff:
         name = request.POST.get('group_name')
         description = request.POST.get('group_description')
 
@@ -70,13 +69,23 @@ def create_group(request):
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
     announcements = group.announcements.all().order_by('-created_at')
+
+    search_query = request.GET.get('search', '')
+    if search_query:
+        students = group.students.filter(username__icontains=search_query)
+    else:
+        students = group.students.all()
+
     return render(request, 'ViewGroup.html', {
         'group': group,
-        'announcements': announcements
+        'announcements': announcements,
+        'students': students,
+        'search_query': search_query,
     })
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 def create_announcement(request, group_id):
     if request.method == 'POST' and request.user.is_staff:
         group = get_object_or_404(Group, id=group_id)
@@ -128,6 +137,7 @@ def create_announcement(request, group_id):
     return redirect('group:group_detail', group_id=group_id)
 
 
+@login_required()
 @user_passes_test(lambda u: u.is_staff)
 def add_students(request, group_id):
     if request.method == 'POST':
@@ -156,6 +166,7 @@ def add_students(request, group_id):
     return redirect('group:group_detail', group_id=group_id)
 
 
+@login_required()
 @user_passes_test(lambda u: u.is_staff)
 def remove_student(request, group_id, student_id):
     if request.method == 'POST':
@@ -175,11 +186,23 @@ def add_group(request):
         group_code = request.POST.get('group_code')
         try:
             group = Group.objects.get(code=group_code)
-            if request.user not in group.students.all():
-                group.students.add(request.user)
-                messages.success(request, f'You have successfully joined the group: {group.name}.')
-            else:
+            
+            # Check if user is already in the group as staff or student
+            is_staff_member = request.user.is_staff and request.user == group.staff
+            is_student_member = request.user in group.students.all()
+            
+            if is_staff_member or is_student_member:
                 messages.warning(request, 'You are already a member of this group.')
+            else:
+                # Add user to appropriate role based on their status
+                if request.user.is_staff:
+                    # If staff is the creator, this won't happen as caught above
+                    group.students.add(request.user)
+                    messages.success(request, f'You have successfully joined the group: {group.name}.')
+                else:
+                    group.students.add(request.user)
+                    messages.success(request, f'You have successfully joined the group: {group.name}.')
+                    
         except Group.DoesNotExist:
             messages.error(request, 'Invalid group code. Please try again.')
 
@@ -193,6 +216,10 @@ def edit_group(request, group_id):
     if request.method == 'POST':
         name = request.POST.get('group_name')
         description = request.POST.get('group_description')
+
+        if Group.objects.filter(name=name).exists():
+            messages.error(request, 'A group with this name already exists.')
+            return redirect('group:group_detail', group_id=group_id)
 
         if name and description:
             group.name = name

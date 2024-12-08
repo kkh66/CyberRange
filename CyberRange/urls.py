@@ -23,6 +23,8 @@ urlpatterns = [
     path('groups/', include('group.urls', namespace='group')),
     path('scenario/', include('scenario.urls', namespace='scenario')),
     path('quiz/', include('quiz.urls', namespace='quiz')),
+    path('tutorial/', include('tutorial.urls', namespace='tutorial')),
+    path('rate/', include('rating.urls', namespace='rating')),
 ]
 
 if settings.DEBUG:

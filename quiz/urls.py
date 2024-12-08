@@ -1,13 +1,17 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'quiz'
 
 urlpatterns = [
-    path('create/<int:scenario_id>/', views.create_quiz, name='CreateQuiz'),
-    path('list/<int:scenario_id>/', views.quiz_list, name='ListQuiz'),
-    path('take/<int:scenario_id>/', views.take_quiz, name='TakeQuiz'),
-    path('delete/<int:scenario_id>/', views.quiz_delete, name='DeleteQuiz'),
-    path('tutorial', views.list_tutorial, name='ListTutorial'),
-    path('edit/<int:scenario_id>/', views.edit_quiz, name='EditQuiz'),
+    # Quiz management
+    path('<int:scenario_id>/', include([
+        path('', views.quiz_list, name='ListQuiz'),
+        path('create/', views.create_quiz, name='CreateQuiz'),
+        path('take/', views.take_quiz, name='TakeQuiz'),
+        path('edit/', views.edit_quiz, name='EditQuiz'),
+        path('delete/', views.quiz_delete, name='DeleteQuiz'),
+        path('submit/', views.submit_quiz, name='SubmitQuiz'),
+    ])),
+    path('check-completion/<int:scenario_id>/', views.check_completion, name='CheckCompletion'),
 ]

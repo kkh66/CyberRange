@@ -10,7 +10,7 @@ async function createWindow() {
         title: 'Cyber Range',
         icon: path.join(__dirname, 'tarIco.ico'),
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: false
         }
     });

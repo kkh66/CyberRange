@@ -3,6 +3,7 @@ from docker import errors
 import random
 from datetime import datetime
 from django.utils import timezone
+import time
 
 
 class DockerManager:
@@ -26,19 +27,41 @@ class DockerManager:
                 return port
 
     def start_container(self, image_name, container_name):
-        for attempt in range(2):
+        max_retries = 2
+        last_error = None
+        
+        for attempt in range(max_retries):
             try:
-                container = self.client.containers.get(container_name)
-                container.reload()
-                if container.status != 'running':
-                    container.start()
-                if '3000/tcp' not in container.ports:
-                    raise Exception("Container exists but has no port mapping")
-                return container.id, container.ports['3000/tcp'][0]['HostPort']
-            except docker.errors.NotFound:
+                # Try to get existing container
                 try:
+                    container = self.client.containers.get(container_name)
+                    container.reload()
+                    
+                    # If container exists but is not running, start it
+                    if container.status != 'running':
+                        container.start()
+                        
+                    # Wait for container to be ready
+                    for _ in range(30):  # 30 seconds timeout
+                        container.reload()
+                        if container.status == 'running':
+                            # Check if port mapping exists
+                            if '3000/tcp' in container.ports:
+                                return container.id, container.ports['3000/tcp'][0]['HostPort']
+                            break
+                        time.sleep(1)
+                        
+                    # If we got here without returning, port mapping failed
+                    raise Exception("Container started but port mapping failed")
+                    
+                except docker.errors.NotFound:
+                    # Container doesn't exist, create new one
                     port = self.get_available_port()
-                    environment = {'PYTHONUNBUFFERED': '1'}
+                    environment = {
+                        'PYTHONUNBUFFERED': '1',
+                        'PORT': '3000'  # Ensure container knows which port to use
+                    }
+                    
                     container = self.client.containers.run(
                         image=image_name,
                         name=container_name,
@@ -48,11 +71,29 @@ class DockerManager:
                         environment=environment,
                         restart_policy={"Name": "unless-stopped"},
                     )
-                    return container.id, port
-                except Exception as e:
-                    if attempt == 1:
-                        raise Exception(f"Failed to create container after 2 attempts: {str(e)}")
+                    
+                    # Wait for container to be ready
+                    for _ in range(30):  # 30 seconds timeout
+                        container.reload()
+                        if container.status == 'running' and '3000/tcp' in container.ports:
+                            return container.id, port
+                        time.sleep(1)
+                    
+                    raise Exception("Container created but failed to start properly")
+                    
+            except Exception as e:
+                last_error = str(e)
+                if attempt < max_retries - 1:
+                    # Try to cleanup before retry
+                    try:
+                        container = self.client.containers.get(container_name)
+                        container.remove(force=True)
+                    except:
+                        pass
+                    time.sleep(2)  # Wait before retry
                     continue
+                else:
+                    raise Exception(f"Failed to start container after {max_retries} attempts: {last_error}")
 
     def get_container_status(self, container_id):
         try:
@@ -65,6 +106,10 @@ class DockerManager:
             is_paused = state.get('Paused', False)
             is_running = state.get('Running', False)
             
+            # If container is paused, ensure status is correct
+            if is_paused:
+                status = 'paused'
+
             runtime = 0
             if started_at and is_running and not is_paused:
                 started_time = datetime.fromisoformat(started_at.replace('Z', '+00:00'))
@@ -109,38 +154,88 @@ class DockerManager:
         except docker.errors.NotFound:
             return {
                 'status': 'error',
-                'message': 'Container not found'
+                'container_status': {
+                    'status': 'stopped',
+                    'is_paused': False,
+                    'is_running': False,
+                    'started_at': None,
+                    'runtime': 0
+                },
+                'progress_info': {
+                    'progress': 0,
+                    'level': None,
+                    'logs': 'Container not found'
+                }
             }
         except Exception as e:
-            print(f"Error getting container status: {e}")
+            print(f"Error getting container status: {str(e)}")
             return {
                 'status': 'error',
-                'message': str(e)
+                'container_status': {
+                    'status': 'error',
+                    'is_paused': False,
+                    'is_running': False,
+                    'started_at': None,
+                    'runtime': 0
+                },
+                'progress_info': {
+                    'progress': 0,
+                    'level': None,
+                    'logs': str(e)
+                }
             }
 
     def stop_container(self, container_id):
         try:
             container = self.client.containers.get(container_id)
+            
+            container.reload()
+            if container.status == 'exited' or not container.attrs['State']['Running']:
+                raise Exception("Container is already stopped")
+            
             container.stop()
             return True
+            
         except Exception as e:
-            raise Exception(f"Failed to stop container: {str(e)}")
+            error_message = str(e)
+            if "Failed to stop container: " in error_message:
+                error_message = error_message.replace("Failed to stop container: ", "")
+            raise Exception(error_message)
 
     def pause_container(self, container_id):
         try:
             container = self.client.containers.get(container_id)
+            
+            container.reload()
+            if container.attrs['State']['Paused']:
+                raise Exception("Container is already paused")
+            
             container.pause()
             return True
+            
         except Exception as e:
-            raise Exception(f"Failed to pause container: {str(e)}")
+            error_message = str(e)
+            if "Failed to pause container: " in error_message:
+                error_message = error_message.replace("Failed to pause container: ", "")
+            raise Exception(error_message)
 
     def unpause_container(self, container_id):
         try:
             container = self.client.containers.get(container_id)
+            
+            container.reload()
+            if not container.attrs['State']['Paused']:
+                raise Exception("Container is not paused")
+            
             container.unpause()
             return True
+            
         except Exception as e:
-            raise Exception(f"Failed to unpause container: {str(e)}")
+            # Extract original error message to avoid duplicate wrapping
+            error_message = str(e)
+            if "Failed to unpause container: " in error_message:
+                error_message = error_message.replace("Failed to unpause container: ", "")
+            raise Exception(error_message)
 
     def restart_container(self, container_id):
         try:

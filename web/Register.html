@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block content %}
-    <div class="login_container">
-        <div class="animated_background"></div>
-        <div class="register_card mt-5">
+    <div class="base_container d-flex align-items-center justify-content-center">
+        <div class="animated_background bg_fi"></div>
+        <div class="base_card mt-5 small_card big_card">
             <form method="POST">
                 {% csrf_token %}
-                <div class="register_header">
+                <div class="base_header">
                     <h1>Sign Up</h1>
                     <p>Create your account to get started</p>
                 </div>
@@ -22,7 +22,7 @@
                 <div class="form-floating mb-3">
                     <i class="fas fa-user form_icon"></i>
                     <input type="text" id="RegisterUsername" name="username"
-                           class="form-control" placeholder=" " required>
+                           class="form-control" value="{{ username|default:'' }}" placeholder=" " required>
                     <label for="RegisterUsername">Username</label>
                 </div>
 
@@ -43,21 +43,21 @@
                 <div class="form-floating mb-3">
                     <i class="fas fa-envelope form_icon"></i>
                     <input type="email" id="RegisterEmail" name="email"
-                           class="form-control" placeholder=" " required>
+                           class="form-control" value="{{ email|default:'' }}" placeholder=" " required>
                     <label for="RegisterEmail">Email</label>
                 </div>
 
                 <div class="form-floating mb-3">
                     <i class="fas fa-user-circle form_icon"></i>
                     <input type="text" id="RegisterFirst" name="first_name"
-                           class="form-control" placeholder=" " required>
+                           class="form-control" value="{{ first_name|default:'' }}" placeholder=" " required>
                     <label for="RegisterFirst">First Name</label>
                 </div>
 
                 <div class="form-floating mb-3">
                     <i class="fas fa-user-circle form_icon"></i>
                     <input type="text" id="RegisteredLast" name="last_name"
-                           class="form-control" placeholder=" " required>
+                           class="form-control" value="{{ last_name|default:'' }}" placeholder=" " required>
                     <label for="RegisteredLast">Last Name</label>
                 </div>
 

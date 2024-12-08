@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Scenario Details for {{ scenario.name }}{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .level_card {
+            flex: 1;
+            max-width: 100%;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .level_card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        .level_header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .level_icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .level_title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin: 0;
+        }
+
+        .level_info {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .info_item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .info_item i {
+            color: var(--accent-color);
+            width: 20px;
+        }
+
+        .tutorial-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 2rem 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        .tutorial-container {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 0 0 0;
+            margin-bottom: 24px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="base_container">
+        <div class="animated_background bg_fi"></div>
+        <div class="tutorial-content">
+            <div class="base_header description_title_header d-flex justify-content-center align-center">
+                <h1>{{ scenario.name }}</h1>
+            </div>
+            <div class="base_card section_card">
+                <h2 class="section_card_title">Scenario Description</h2>
+                <p>{{ scenario.scenariodetails.description|safe }}</p>
+            </div>
+            <div class="base_card section_card">
+                <h2 class="section_card_title">Objectives and outcome:</h2>
+                <p>{{ scenario.scenariodetails.objectives|safe }}</p>
+            </div>
+            <div class="base_card section_card">
+                <h2 class="section_card_title">Pre-requisites:</h2>
+                <p>{{ scenario.scenariodetails.prerequisites|safe }}</p>
+            </div>
+            <div class="base_card section_card">
+                <h2 class="section_card_title">Objective of this RDP Scenario:</h2>
+                <p>{{ scenario.scenariodetails.objective_detail|safe }}</p>
+            </div>
+
+            <!-- Level Display Section -->
+            <div class="base_card section_card">
+                <h2 class="section_card_title">Difficulty Levels</h2>
+                <div class="level_container">
+                    {% for level in scenario.levels.all %}
+                        <div class="level_card">
+                            <div class="level_header">
+                                <div class="level_icon">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <h3 class="level_title">Level {{ level.get_difficulty_display }}</h3>
+
+                            </div>
+                            <div class="level_info">
+                                <div class="info_item">
+                                    <i class="fas fa-gamepad"></i>
+                                    <span>{{ level.get_mode_display }}</span>
+                                </div>
+                                <div class="info_item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>{{ level.recommended_time }} minutes</span>
+                                </div>
+                                <div class="info_item">
+                                    <i class="fas fa-tools"></i>
+                                    <span>{{ level.tools }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-center mt-4">
+                <a href="{% url 'tutorial:ViewTutorial' scenario.id %}" class="base_btn btn_prev">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <a href="{% url 'scenario:start_scenario' scenario.id %}" class="base_btn btn_next">
+                    Start Scenario <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

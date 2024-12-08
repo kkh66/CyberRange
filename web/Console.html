@@ -1,148 +1,480 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block title %}
     Dashboard - TARUMT Cyber Range
 {% endblock %}
+
 {% block styles %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        .dashboard-container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .table {
+            color: #e2e8f0;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .table td, .table th {
+            color: white;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .breadcrumb-item.active {
+            color: #e2e8f0;
+        }
+
+        .stats-card {
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .badge {
+            padding: 0.5em 1em;
+        }
+
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+
+        .screenshot-thumbnail img {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .screenshot-thumbnail:hover img {
+            transform: scale(1.1);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: rgba(40, 167, 69, 0.9);
+        }
+
+        .btn-success:hover {
+            background: rgba(40, 167, 69, 1);
+        }
+
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.9);
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+
+        .btn-info {
+            background: rgba(23, 162, 184, 0.9);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: rgba(23, 162, 184, 1);
+            color: white;
+        }
+
+
+        tr:hover {
+            color: #ffffff;
+        }
+
+        tr:active {
+            color: #ffffff;
+        }
+
+        .screenshot-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+
+        .screenshot-preview img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .screenshot-preview.active {
+            display: flex;
+        }
+
+        .screenshots-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .screenshot-thumbnail {
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+        }
+
+        .table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff !important;
+            cursor: pointer;
+            transform: translateX(5px);
+        }
+    </style>
 {% endblock %}
+
 {% block content %}
-    {% if user.is_staff %}
-        <h1 class="mt-4">Dashboard</h1>
+    <div class="animated_background bg_fi"></div>
+    <div class="dashboard-container">
+        <h1 class="mt-4">{% if user.is_staff %}Admin Dashboard{% else %}Student Dashboard{% endif %}</h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item active">Dashboard Overview</li>
+            <li class="breadcrumb-item active">{% if user.is_staff %}Management Overview{% else %}Learning
+                Progress{% endif %}</li>
         </ol>
-        
+
         <!-- Statistics Cards -->
-        <div class="row">
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-primary text-white mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-0">{{ total_scenarios }}</h3>
-                                <div>Total Scenarios</div>
-                            </div>
-                            <i class="fas fa-laptop-code fa-2x opacity-50"></i>
+        <div class="row mb-4">
+            {% if user.is_staff %}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-primary text-white mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-0">{{ total_users }}</h4>
+                            <div>Total Students in My Groups</div>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="">View Details</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link" href="{% url 'scenario:list_all_scenarios' %}">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                    </div>
                 </div>
-            </div>
-            
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-warning text-white mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-0">{{ total_users }}</h3>
-                                <div>Active Users</div>
-                            </div>
-                            <i class="fas fa-users fa-2x opacity-50"></i>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-success text-white mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-0">{{ total_scenarios }}</h4>
+                            <div>Total Scenarios</div>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="{% url 'scenario:list_all_scenarios' %}">View
+                                Details</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link" href="#">View Users</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                    </div>
                 </div>
-            </div>
-            
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-success text-white mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-0">{{ completed_scenarios }}</h3>
-                                <div>Completed Scenarios</div>
-                            </div>
-                            <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-info text-white mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-0">{{ total_groups }}</h4>
+                            <div>Total Groups</div>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="{% url 'group:group_list' %}">View
+                                Details</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link" href="#">View Details</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                    </div>
                 </div>
-            </div>
-            
-            <div class="col-xl-3 col-md-6">
-                <div class="card bg-info text-white mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-0">{{ active_scenarios }}</h3>
-                                <div>Active Containers</div>
-                            </div>
-                            <i class="fab fa-docker fa-2x opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="card-footer d-flex align-items-center justify-content-between">
-                        <a class="small text-white stretched-link" href="#">View Active</a>
-                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
 
-        <!-- Recent Activities and Top Scenarios -->
-        <div class="row">
-
-            
-            <div class="col-xl-6">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-star me-1"></i>
-                        Top Rated Scenarios
+        {% if user.is_staff %}
+            <!-- Active Student Scenarios -->
+            <div class="card base_card mb-4">
+                <div class="base_header ">
+                    <h5 class="base_title complete_title">
+                        <i class="fas fa-users me-1"></i>
+                        Active Student Scenarios</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Group</th>
+                                <th>Scenario</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for user_scenario in active_student_scenarios %}
+                                <tr>
+                                    <td class="user-name">{{ user_scenario.user.username }}</td>
+                                    <td>
+                                        {% for group_scenario in user_scenario.scenario.groups.all %}
+                                            {% if group_scenario.group.staff == user %}
+                                                {{ group_scenario.group.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td class="scenario-name">{{ user_scenario.scenario.name }}</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated"
+                                                 role="progressbar"
+                                                 style="width: {{ user_scenario.progress|default:0 }}%"
+                                                 aria-valuenow="{{ user_scenario.progress|default:0 }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                                {{ user_scenario.progress|default:0 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="empty_state empty_state_custom">No active scenarios</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="card-body">
+                </div>
+            </div>
+        {% endif %}
+
+        {% if user.is_staff %}
+            <!-- Completed Scenarios Section -->
+            <div class="base_card mb-4">
+                <div class="base_header">
+                    <h5 class="mb-0 base_title complete_title">
+                        <i class="fas fa-check-circle me-2"></i>Completed Scenarios
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if completed_scenarios %}
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
-                                    <tr>
-                                        <th>Scenario</th>
-                                        <th>Rating</th>
-                                        <th>Total Ratings</th>
-                                    </tr>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Scenario</th>
+                                    <th>Status</th>
+                                    <th>Completion (30%)</th>
+                                    <th>Quiz Score (70%)</th>
+                                    <th>Total Marks</th>
+                                    <th>Rating</th>
+                                    <th>Screenshots</th>
+                                    <th>Actions</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {% for scenario in top_scenarios %}
+                                {% for scenario in completed_scenarios %}
                                     <tr>
-                                        <td>{{ scenario.name }}</td>
+                                        <td><span class="user-name">{{ scenario.user.username }}</span></td>
+                                        <td><span class="scenario-name">{{ scenario.scenario.name }}</span></td>
                                         <td>
-                                            <span class="text-warning">
-                                                {% for i in "12345"|make_list %}
-                                                    {% if forloop.counter <= scenario.avg_rating %}
-                                                        <i class="fas fa-star"></i>
-                                                    {% else %}
-                                                        <i class="far fa-star"></i>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </span>
-                                            ({{ scenario.avg_rating|floatformat:1 }})
+                                            {% if scenario.approval_status == 'approved' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif scenario.approval_status == 'rejected' %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
                                         </td>
-                                        <td>{{ scenario.total_ratings }}</td>
+                                        <td>
+                                            {% if scenario.approval_status == 'approved' %}
+                                                30%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if scenario.quiz_score is not None %}
+                                                {% widthratio scenario.quiz_score scenario.total_questions 70 %}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if scenario.approval_status == 'approved' %}
+                                                {% if scenario.quiz_score is not None %}
+                                                    {% widthratio scenario.quiz_score scenario.total_questions 70 as quiz_score %}
+                                                    {{ quiz_score|add:30 }}%
+                                                {% else %}
+                                                    30%
+                                                {% endif %}
+                                            {% else %}
+                                                {% if scenario.quiz_score is not None %}
+                                                    {% widthratio scenario.quiz_score scenario.total_questions 70 %}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ scenario.rating|default:"Not rated" }}</td>
+                                        <td>
+                                            <div class="screenshots-container">
+                                                {% for screenshot in scenario.screenshots.all %}
+                                                    <div class="screenshot-thumbnail">
+                                                        <img src="{{ screenshot.image.url }}"
+                                                             alt="Screenshot"
+                                                             class="img-thumbnail"
+                                                             style="width: 50px; height: 50px; object-fit: cover;"
+                                                             onclick="showScreenshot('{{ screenshot.image.url }}')">
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if scenario.approval_status == 'rejected' %}
+                                                <div class="d-flex gap-2">
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="approve">
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            <i class="fas fa-clock me-1"></i>Approve
+                                                        </button>
+                                                    </form>
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="pending">
+                                                        <button type="submit" class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-check me-1"></i>Pending
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% elif scenario.approval_status == 'pending' %}
+                                                <div class="d-flex gap-2">
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="approve">
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            <i class="fas fa-check me-1"></i>Approve
+                                                        </button>
+                                                    </form>
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="reject">
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-times me-1"></i>Reject
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% elif scenario.approval_status == 'approved' %}
+                                                <div class="d-flex gap-2">
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="pending">
+                                                        <button type="submit" class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-clock me-1"></i>Pending
+                                                        </button>
+                                                    </form>
+                                                    <form method="post"
+                                                          action="{% url 'scenario:approve_scenario' scenario.scenario.id scenario.user.id %}"
+                                                          class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="reject">
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-times me-1"></i>Reject
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </td>
                                     </tr>
-                                    {% endfor %}
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    {% else %}
+                        <div class="empty_state py-4">
+                            <i class="fas fa-info-circle fa-3x mb-3" style="color: #3b82f6;"></i>
+                            <h5>No Completed Scenarios</h5>
+                            <p class="text-muted">No scenarios have been completed yet.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-        </div>
-    {% endif %}
-{% endblock %}
-{% block Script %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-    <script src="{% static 'js/datatables-simple-demo.js' %}"></script>
-    
-    <script>
-        // Add any additional JavaScript for interactivity
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize any necessary components
-        });
-    </script>
+
+            <!-- Screenshot Preview Modal -->
+            <div class="screenshot-preview" onclick="hideScreenshot()">
+                <img src="" alt="Screenshot Preview">
+            </div>
+
+            <script>
+                function showScreenshot(url) {
+                    const preview = document.querySelector('.screenshot-preview');
+                    const img = preview.querySelector('img');
+                    img.src = url;
+                    preview.classList.add('active');
+                }
+
+                function hideScreenshot() {
+                    const preview = document.querySelector('.screenshot-preview');
+                    preview.classList.remove('active');
+                }
+
+                document.querySelector('.screenshot-preview img').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            </script>
+        {% endif %}
+    </div>
 {% endblock %}
