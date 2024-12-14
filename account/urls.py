@@ -17,9 +17,9 @@ urlpatterns = [
     ])),
     # Admin function
     path('admin/staff/', include([
-        path('add/', views.register_instructor, name='register_Instructor'),
-        path('activate/', views.activate_instructor, name='activate_Instructor'),
-        path('list/', views.instructor_list, name='Instructor_list'),
+        path('add/', views.register_instructor, name='RegisterInstructor'),
+        path('activate/', views.activate_instructor, name='ActivateInstructor'),
+        path('list/', views.instructor_list, name='InstructorList'),
         path('list/<int:user_id>/toggle/', views.btn_instructor_status, name='Btn_Instructor_Status'),
     ])),
 ]
