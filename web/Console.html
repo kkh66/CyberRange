@@ -292,7 +292,7 @@
         {% if user.is_staff %}
             <!-- Completed Scenarios Section -->
             <div class="base_card mb-4">
-                <div class="base_header">
+                <div class="base_header d-flex align-items-start">
                     <h5 class="mb-0 base_title complete_title">
                         <i class="fas fa-check-circle me-2"></i>Completed Scenarios
                     </h5>
@@ -309,7 +309,6 @@
                                     <th>Completion (30%)</th>
                                     <th>Quiz Score (70%)</th>
                                     <th>Total Marks</th>
-                                    <th>Rating</th>
                                     <th>Screenshots</th>
                                     <th>Actions</th>
                                 </tr>
@@ -358,7 +357,6 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
-                                        <td>{{ scenario.rating|default:"Not rated" }}</td>
                                         <td>
                                             <div class="screenshots-container">
                                                 {% for screenshot in scenario.screenshots.all %}

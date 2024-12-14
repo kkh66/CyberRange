@@ -15,7 +15,16 @@ async function createWindow() {
         }
     });
 
-    await mainWindow.loadURL('http://localhost:8000/');
+    try {
+        await mainWindow.loadURL('http://localhost:8000/');
+    } catch (error) {
+
+        dialog.showErrorBox('Connection Error', 
+            'Failed to connect to the server. ');
+        mainWindow = null;
+        app.quit();
+        return;
+    }
 
     mainWindow.on('close', async (e) => {
         e.preventDefault();
@@ -53,13 +62,6 @@ async function createWindow() {
                 app.exit();
             }
         }
-    });
-
-    mainWindow.webContents.on('did-fail-load', () => {
-        dialog.showErrorBox('Connection Error',
-            'Failed to connect to Django server. Please ensure the server is running on port 8000.');
-        mainWindow = null;
-        app.quit();
     });
 }
 

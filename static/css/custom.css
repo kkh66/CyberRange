@@ -19,6 +19,7 @@
     overflow: hidden;
 }
 
+
 .pdf-file-container {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid #dee2e6;
@@ -167,6 +168,10 @@
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
 }
 
+.view_tutorial_card {
+    margin-bottom: 2rem !important;
+}
+
 .rating_card {
     width: 600px !important;
     padding: 30px;
@@ -201,13 +206,6 @@
     transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     border-radius: 15px;
     border: 1px solid var(--border-color);
-}
-
-.section_card_title {
-    color: #4ecdc4;
-    border-bottom: 2px solid #4ecdc4;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
 }
 
 .section_card:hover {
@@ -350,9 +348,30 @@
 
 /* Common Header Styles */
 .base_header {
-    text-align: center;
+    text-align: center !important;
     margin-bottom: 2rem;
     color: white;
+}
+
+.view_tutorial_header {
+    margin: 0 !important;
+    font-size: 2.5rem !important;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.section_card_title {
+    color: #4ecdc4;
+    border-bottom: 2px solid #4ecdc4;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.view_section_title {
+    text-align: start !important;;
+    font-size: 1.5rem !important;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .scenario_all_header {
@@ -392,6 +411,11 @@
 
 .base_header p {
     font-size: 1rem;
+}
+
+.level_title {
+    color: var(--accent-color);
+    margin: 0;
 }
 
 .complete_title {
@@ -1259,4 +1283,136 @@
 
 .text_white {
     color: white !important;
+}
+
+.base_search {
+    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.base_search:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.base_search::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search_instructor {
+    flex: 1;
+}
+
+.search_student {
+    flex: 0;
+    width: 150px;
+}
+
+.base_search_btn {
+    border: none;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.base_search_btn:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+.search_instructor_btn {
+    padding: 10px 20px;
+
+}
+
+.search_student_btn {
+    padding: 10px;
+}
+
+.search-button i {
+    margin-right: 8px;
+}
+
+.search-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Level Styles */
+.level_card {
+    flex: 1;
+    max-width: 100%;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.level_card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-color);
+}
+
+.level_header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.level_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.level_info {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.level_info .info_item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.level_info .info_item i {
+    color: var(--accent-color);
+    width: 20px;
+}
+
+/* Tutorial Content Styles */
+.tutorial-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 2rem 0 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.tutorial-container {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 0 0 0;
+    margin-bottom: 24px;
 }
