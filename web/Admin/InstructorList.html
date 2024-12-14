@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load i18n %}
 {% load static %}
 
 {% block title %}Instructor List{% endblock %}
@@ -52,46 +51,6 @@
         input:checked + .slider:before {
             transform: translateX(24px);
         }
-
-        .search-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .search-button {
-            padding: 10px 20px;
-            background: #3b82f6;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .search-button:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        .search-button i {
-            margin-right: 8px;
-        }
     </style>
 {% endblock %}
 
@@ -102,15 +61,15 @@
             <div class="base_card mt-3">
                 <div class="base_header d-flex justify-content-between align-items-center">
                     <h1 class="base_title">Instructor List</h1>
-                    <form id="searchForm" method="GET" action="{% url 'account:Instructor_list' %}"
+                    <form id="searchForm" method="GET" action="{% url 'account:InstructorList' %}"
                           class="search-container">
                         <input type="text"
                                id="searchInput"
                                name="search"
-                               class="search-input"
+                               class="base_search search_instructor"
                                placeholder="Search by username or email..."
                                value="{{ request.GET.search|default:'' }}">
-                        <button type="submit" class="search-button">
+                        <button type="submit" class="base_search_btn search_instructor_btn">
                             <i class="fas fa-search"></i>Search
                         </button>
                     </form>
@@ -149,7 +108,7 @@
                             <tr>
                                 <td colspan="4" class="empty_state">
                                     <i class="fas fa-users-slash fa-3x mb-3"></i>
-                                    <p>{% trans 'No Instructor found.' %}</p>
+                                    <p>No Instructor found.</p>
                                 </td>
                             </tr>
                         {% endfor %}
