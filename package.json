@@ -8,7 +8,7 @@
     "build": "electron-builder --win portable"
   },
   "author": "lkh & whelan",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "build": {
     "appId": "com.cyberrange.app",
     "productName": "CyberRange",
@@ -16,32 +16,20 @@
       "target": [
         "portable"
       ],
-      "artifactName": "${productName}-${version}.${ext}",
       "icon": "tarIco.ico"
     },
     "files": [
-      "**/*",
-      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-      "!**/node_modules/*.d.ts",
-      "!**/node_modules/.bin",
-      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-      "!.editorconfig",
-      "!**/._*",
-      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
-      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-      "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+      "main.js",
+      "tarIco.ico",
+      "package.json"
     ],
     "directories": {
-      "output": "dist"
+      "output": "build"
     }
   },
   "devDependencies": {
+    "7zip-bin": "^5.2.0",
     "electron": "^33.2.0",
-    "electron-builder": "25.1.8"
-  },
-  "dependencies": {
-    "tinymce": "^7.5.1"
+    "electron-builder": "^25.1.8"
   }
 }

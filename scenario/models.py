@@ -4,7 +4,6 @@ from django.utils import timezone
 from tinymce.models import HTMLField
 
 from .utils import DockerManager
-from django.core.validators import MinValueValidator
 
 
 # Create your models here.
@@ -131,7 +130,7 @@ class Level(models.Model):
         ('multiplayer', 'Multi Player')
     ]
 
-    scenario = models.ForeignKey(Scenario, on_delete=models.CASCADE, related_name='levels')
+    scenario = models.OneToOneField(Scenario, on_delete=models.CASCADE, related_name='level')
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
     mode = models.CharField(max_length=20, choices=MODE_CHOICES, default='singleplayer')
     tools = models.TextField(help_text='Required tools for this level')
@@ -142,5 +141,4 @@ class Level(models.Model):
 
     class Meta:
         ordering = ['id']
-        unique_together = ('scenario', 'difficulty')
 

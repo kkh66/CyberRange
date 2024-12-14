@@ -1,19 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
-from django.db.models import Avg, Count, Max
-from .models import ScenarioRating, QuizRating, TutorialRating
-from scenario.models import Scenario
-from quiz.models import Quiz
-from tutorial.models import Tutorial
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
-from django.core.paginator import Paginator
-from django.db.models import F, ExpressionWrapper, DateTimeField
-from scenario.models import UserScenario
+from django.db.models import Avg, Count
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
+from quiz.models import Quiz
+from scenario.models import Scenario
+from scenario.models import UserScenario
+from tutorial.models import Tutorial
+from .models import ScenarioRating, QuizRating, TutorialRating
 
+
+# This is the idea of the rating app you can base on your idea to change it.
 @login_required
 def rate_content(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
