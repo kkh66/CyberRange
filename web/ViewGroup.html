@@ -45,51 +45,6 @@
         .ratio-16x9 {
             max-height: 400px;
         }
-
-        .search-input {
-            flex: 0;
-            padding: 10px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            font-size: 16px;
-            width: 150px;
-            transition: all 0.3s ease;
-        }
-
-        .search-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .search-button {
-            padding: 10px;
-            background: #3b82f6;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-
-        .search-button:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
     </style>
 {% endblock %}
 {% block content %}
@@ -318,10 +273,10 @@
                                 <input type="text"
                                        id="searchInput"
                                        name="search"
-                                       class="search-input"
+                                       class="base_search search_student"
                                        placeholder="Search username"
                                        value="{{ request.GET.search|default:'' }}">
-                                <button type="submit" class="search-button">
+                                <button type="submit" class="base_search_btn search_student_btn">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </form>
