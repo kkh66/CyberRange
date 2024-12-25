@@ -168,6 +168,10 @@
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
 }
 
+.view_tutorial_card {
+    margin-bottom: 2rem !important;
+}
+
 .rating_card {
     width: 600px !important;
     padding: 30px;
@@ -202,13 +206,6 @@
     transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     border-radius: 15px;
     border: 1px solid var(--border-color);
-}
-
-.section_card_title {
-    color: #4ecdc4;
-    border-bottom: 2px solid #4ecdc4;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
 }
 
 .section_card:hover {
@@ -351,9 +348,30 @@
 
 /* Common Header Styles */
 .base_header {
-    text-align: center;
+    text-align: center !important;
     margin-bottom: 2rem;
     color: white;
+}
+
+.view_tutorial_header {
+    margin: 0 !important;
+    font-size: 2.5rem !important;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.section_card_title {
+    color: #4ecdc4;
+    border-bottom: 2px solid #4ecdc4;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.view_section_title {
+    text-align: start !important;;
+    font-size: 1.5rem !important;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .scenario_all_header {

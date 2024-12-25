@@ -59,10 +59,10 @@
                         <div class="d-flex align-items-center gap-4">
                             <div class="stats_item">
                                 <i class="fas fa-users me-2"></i>
-                                <span>{{ group.students.count }} Students</span>
+                                <span>{{ group.students.count }} Learners</span>
                             </div>
                             <div class="code-box">
-                                <span class="me-2">Class Code:</span>
+                                <span class="me-2">Group Code:</span>
                                 <div class="code-container">
                                     <code id="classCode">{{ group.code }}</code>
                                     <button onclick="copyCode()" class="copy-button" title="Copy Code">
@@ -93,7 +93,7 @@
                                 <button type="button" class="action_btn" data-bs-toggle="modal"
                                         data-bs-target="#addStudentModal">
                                     <i class="fa-solid fa-user-plus me-2"></i>
-                                    <span>Add Students</span>
+                                    <span>Add Learner</span>
                                 </button>
                             {% endif %}
                         </div>
@@ -259,14 +259,14 @@
                 </div>
             </div>
 
-            <!-- Right column for student list -->
+            <!-- Right column for learner list -->
             <div class="col-md-4">
                 <div class="base_card group_card">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-users me-2"></i>Students
+                                    <i class="fas fa-users me-2"></i>Learners
                                 </h5>
                             </div>
                             <form id="searchForm" method="GET" action="" class="search-container">
@@ -303,7 +303,7 @@
                             {% empty %}
                                 <li class="list-group-item empty-state view_empty_state">
                                     <i class="fas fa-user-slash"></i>
-                                    <p>No students enrolled yet.</p>
+                                    <p>No learners enrolled yet.</p>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -313,7 +313,7 @@
         </div>
     </div>
 
-    <!-- Add Student Modal -->
+    <!-- Add Learner Modal -->
     {% if request.user.is_staff %}
         {% if request.user == group.staff %}
             <div class="modal fade base_modal" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel"
@@ -324,7 +324,7 @@
                         <div class="modal-header">
                             <h5 class="modal-title" id="addStudentModalLabel">
                                 <i class="fas fa-user-plus me-2"></i>
-                                Add Students to Group
+                                Add Learners to Group
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -334,19 +334,19 @@
                                 <div class="mb-4">
                                     <label for="studentSelect" class="form-label">
                                         <i class="fas fa-search me-2"></i>
-                                        Search and Select Students
+                                        Search and Select Learners
                                     </label>
                                     <select class="form-select custom-select" id="studentSelect" name="student_ids"
                                             multiple>
                                     </select>
                                     <small class="text-muted mt-2 d-block">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        Type to search for students by name or email
+                                        Type to search for learners by name or email
                                     </small>
                                 </div>
 
                                 <div id="selectedStudents" class="selected-students-container">
-                                    <!-- Selected students will appear here -->
+                                    <!-- Selected learners will appear here -->
                                 </div>
                             </div>
                             <div class="modal-footer footer_custom">
@@ -354,7 +354,7 @@
                                     <i class="fas fa-times me-2"></i>Cancel
                                 </button>
                                 <button type="submit" class="btn btn-primary btn-custom">
-                                    <i class="fas fa-user-plus me-2"></i>Add Selected Students
+                                    <i class="fas fa-user-plus me-2"></i>Add Selected Learners
                                 </button>
                             </div>
                         </form>

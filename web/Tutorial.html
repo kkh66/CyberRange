@@ -21,18 +21,6 @@
             margin-bottom: 24px;
         }
 
-        .animated_background {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
-            background-size: 400% 400%;
-            animation: gradient_shift 15s ease infinite;
-            z-index: -1;
-            top: 0;
-            left: 0;
-        }
-
         .tutorial-content {
             max-width: 1200px;
             margin: 0 auto;
@@ -41,53 +29,9 @@
             z-index: 2;
         }
 
-        .tutorial-header {
-            backdrop-filter: blur(10px);
-            background: var(--glass-bg);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        .tutorial-title {
-            color: #fff;
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .section-card {
-            backdrop-filter: blur(10px);
-            background: var(--glass-bg);
-            border-radius: 15px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-            overflow: hidden;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-        }
-
-        .section-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-color);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
         .section-header {
             padding: 1.5rem 2rem;
             border-bottom: 1px solid var(--border-color);
-        }
-
-        .section-title {
-            color: #fff;
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 500;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .section-content {
@@ -120,32 +64,6 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        @media (max-width: 768px) {
-            .tutorial-content {
-                padding: 1rem;
-            }
-
-            .section-card {
-                margin: 1rem;
-            }
-
-            .section-header {
-                text-align: center;
-            }
-        }
-
-        @keyframes gradient_shift {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
         .nav_button i {
             font-size: 0.9em;
         }
@@ -155,16 +73,16 @@
 {% block content %}
     {% csrf_token %}
     <div class="tutorial-container">
-        <div class="animated_background"></div>
+        <div class="animated_background bg_fi"></div>
         <div class="tutorial-content">
-            <div class="tutorial-header">
-                <h1 class="tutorial-title">{{ tutorial.title }}</h1>
+            <div class="base_card view_tutorial_card">
+                <h1 class="base_header view_tutorial_header">{{ tutorial.title }}</h1>
             </div>
 
             {% for section in sections %}
-                <div class="section-card">
+                <div class="section_card">
                     <div class="section-header">
-                        <h2 class="section-title"><strong>{{ section.title }}</strong></h2>
+                        <h2 class="base_header view_section_title"><strong>{{ section.title }}</strong></h2>
                     </div>
                     <div class="section-content">
                         {{ section.content|safe }}

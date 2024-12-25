@@ -1,20 +1,18 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from group.models import Group
 from django.contrib import messages
-from django.http import JsonResponse
-from django.db.models import Avg, Count, Max, Subquery, OuterRef
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count, Subquery, OuterRef
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from scenario.models import *
-from .utils import DockerManager
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
+
+from group.models import Group
 from quiz.models import Quiz, QuizAttempt
 from rating.models import ScenarioRating
-from django.contrib.auth.models import User
-from django.views.decorators.http import require_http_methods
-from datetime import timedelta
-import json
+from scenario.models import *
+from .utils import DockerManager
 
 
 @login_required
@@ -56,18 +54,15 @@ def create_scenario(request, group_id):
 @login_required
 def edit_scenario(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
-    group_scenario = get_object_or_404(GroupScenario, scenario=scenario)
 
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
         docker_image = request.POST.get('docker_image')
-        time_limit = request.POST.get('time_limit', 60)
 
         scenario.name = name
         scenario.description = description
         scenario.docker_name = docker_image
-        scenario.time_limit = time_limit
         scenario.save()
 
         messages.success(request, 'Scenario updated successfully!')

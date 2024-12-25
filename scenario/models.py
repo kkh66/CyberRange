@@ -4,7 +4,6 @@ from django.utils import timezone
 from tinymce.models import HTMLField
 
 from .utils import DockerManager
-from django.core.validators import MinValueValidator
 
 
 # Create your models here.

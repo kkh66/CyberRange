@@ -1,19 +1,21 @@
 import datetime
-from django.contrib.auth import logout, update_session_auth_hash
+
+from django.contrib import messages, auth
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages, auth
 from django.template.loader import render_to_string
 from django.urls.base import reverse
 from django.utils import timezone
-from django.contrib.auth.models import User
 from django.utils.html import strip_tags
+
 from CyberRange.utils import generate_code
 from .models import PasswordResetRequest, StaffActivationPin, UserActivationPin, LoginAttempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q
 
 
 def check_password_case(password):
@@ -181,7 +183,7 @@ def login(request):
                         'Your account has been deactivated due to too many failed attempts. '
                         'Please Reactivate your account.'
                     )
-                    return redirect('account:ReactivateAccount')
+                    return redirect('account:RequestActivation')
                 else:
                     attempts_remaining = LoginAttempt.MAX_ATTEMPTS - failed_attempts
                     messages.warning(
