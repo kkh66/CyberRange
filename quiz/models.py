@@ -1,6 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
 from scenario.models import Scenario
+
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
@@ -9,6 +11,7 @@ class Quiz(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
@@ -23,6 +26,7 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text[:50]
+
 
 class QuizAttempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
