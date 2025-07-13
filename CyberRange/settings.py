@@ -152,10 +152,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'rssvdbr@gmail.com'
-EMAIL_HOST_PASSWORD = 'bmmigytuztjogwcy'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'rssvdbr@gmail.com'
+DEFAULT_FROM_EMAIL = ''
 
 # URL fetch settings
 URL_FETCH_MAX_LENGTH = 200
