@@ -5,22 +5,6 @@
 
 {% block styles %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-    <style>
-        .card-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .card-title {
-            font-size: 2.5rem;
-            color: #fff;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-        }
-    </style>
 {% endblock %}
 
 {% block content %}
@@ -28,10 +12,10 @@
         <div class="base_container d-flex align-items-center justify-content-center">
             <div class="animated_background bg_ab"></div>
             <div class="base_card small_card big_card">
-                <form method="POST" action="{% url 'account:register_Instructor' %}">
+                <form method="POST" action="{% url 'account:RegisterInstructor' %}">
                     {% csrf_token %}
-                    <div class="card-header">
-                        <h1 class="card-title">
+                    <div class="card-header mb-3">
+                        <h1 class="card-title d-flex align-items-center justify-content-center">
                             <i class="fas fa-chalkboard-teacher"></i>
                             Add Instructor
                         </h1>
@@ -40,7 +24,7 @@
                     <div class="form-floating mb-3">
                         <i class="fas fa-user form_icon"></i>
                         <input type="text" class="form-control" id="RegisterUsername"
-                               name="staff_username" placeholder=" " required>
+                               name="staff_username" placeholder=" " value="{{ staff_username|default:'' }}" required>
                         <label for="RegisterUsername">Username</label>
                     </div>
 
@@ -61,21 +45,22 @@
                     <div class="form-floating mb-3">
                         <i class="fas fa-envelope form_icon"></i>
                         <input type="email" class="form-control" id="RegisterEmail"
-                               name="staff_email" placeholder=" " required>
+                               name="staff_email" value="{{ staff_email|default:'' }}" placeholder=" " required>
                         <label for="RegisterEmail">Email</label>
                     </div>
 
                     <div class="form-floating mb-3">
                         <i class="fas fa-user-circle form_icon"></i>
                         <input type="text" class="form-control" id="RegisterFirst"
-                               name="staff_first_name" placeholder=" " required>
+                               name="staff_first_name" value="{{ staff_first_name|default:'' }}" placeholder=" "
+                               required>
                         <label for="RegisterFirst">First Name</label>
                     </div>
 
                     <div class="form-floating mb-3">
                         <i class="fas fa-user-circle form_icon"></i>
                         <input type="text" class="form-control" id="RegisteredLast"
-                               name="staff_last_name" placeholder=" " required>
+                               name="staff_last_name" value="{{ staff_last_name|default:'' }}" placeholder=" " required>
                         <label for="RegisteredLast">Last Name</label>
                     </div>
 
