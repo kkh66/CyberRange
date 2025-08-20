@@ -278,6 +278,7 @@ def logout_use(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def register_instructor(request):
+    context = {}
     if request.method == 'POST':
         username = request.POST['staff_username']
         password = request.POST['staff_password']
@@ -286,38 +287,46 @@ def register_instructor(request):
         first_name = request.POST['staff_first_name']
         last_name = request.POST['staff_last_name']
 
+        context = {
+            'staff_username': username,
+            'staff_email': email,
+            'staff_first_name': first_name,
+            'staff_last_name': last_name
+        }
+
         if not check_password_case(password):
             messages.error(request, 'Password must contain both uppercase and lowercase letters')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         if not check_password_case(confirm_password):
             messages.error(request, 'Password must contain both uppercase and lowercase letters')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         if not check_password_numeric_and_symbols(password):
             messages.error(request, 'Password must contain numeric and special characters')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
+
         if not check_password_numeric_and_symbols(confirm_password):
             messages.error(request, 'Password must contain numeric and special characters')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists, choose another one')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Email already exists, choose another one')
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         try:
             validate_password(password)
         except ValidationError as e:
             messages.error(request, ', '.join(e.messages))
-            return redirect('account:register_Instructor')
+            return render(request, 'Admin/CreateInstructor.html', context)
 
         user = User.objects.create_user(
             username=username,
@@ -332,14 +341,14 @@ def register_instructor(request):
         pin = generate_code()
         expires_at = timezone.now() + timezone.timedelta(minutes=15)
         StaffActivationPin.objects.create(user=user, pin=pin, expires_at=expires_at)
-        activation_url = request.build_absolute_uri(reverse('account:activate_Instructor'))
+        activation_url = request.build_absolute_uri(reverse('account:ActivateInstructor'))
 
-        context = {
+        email_context = {
             'username': username,
             'pin': pin,
             'activation_url': activation_url,
         }
-        html_message = render_to_string('Admin/ActivePinPage.html', context)
+        html_message = render_to_string('Admin/ActivePinPage.html', email_context)
         plain_message = strip_tags(html_message)
 
         send_mail(
@@ -351,9 +360,9 @@ def register_instructor(request):
         )
 
         messages.success(request, "Staff registration successful. An activation email has been sent.")
-        return redirect('account:register_Instructor')
+        return redirect('account:RegisterInstructor')
 
-    return render(request, 'Admin/CreateInstructor.html')
+    return render(request, 'Admin/CreateInstructor.html', context)
 
 
 def activate_instructor(request):
@@ -402,7 +411,7 @@ def btn_instructor_status(request, user_id):
     staff_member.save()
     status = "activated" if staff_member.is_active else "deactivated"
     messages.success(request, f'Staff member {staff_member.username} has been {status}.')
-    return redirect('account:Instructor_list')
+    return redirect('account:InstructorList')
 
 
 def handler404(request, exception):

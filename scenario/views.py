@@ -698,7 +698,7 @@ def submit_screenshots(request, scenario_id):
 def manage_scenario_description(request, scenario_id):
     scenario = get_object_or_404(Scenario, id=scenario_id)
     scenario_details = ScenarioDetails.objects.filter(scenario=scenario).first()
-    levels = Level.objects.filter(scenario=scenario).order_by('id')
+    level = Level.objects.filter(scenario=scenario).first()
 
     if request.method == 'POST':
         try:
@@ -718,51 +718,38 @@ def manage_scenario_description(request, scenario_id):
                     objective_detail=request.POST.get('objective_detail', '')
                 )
 
-            # Handle levels
-            existing_level_ids = set()
-            level_data = {}
+            # Handle single level
+            level_data = {
+                'difficulty': request.POST.get('level_difficulty', 'beginner'),
+                'mode': request.POST.get('level_mode', 'singleplayer'),
+                'tools': request.POST.get('level_tools', ''),
+                'recommended_time': request.POST.get('level_time', 0)
+            }
 
-            # Collect level data from POST
-            for key, value in request.POST.items():
-                if key.startswith('level_'):
-                    parts = key.split('_')
-                    if len(parts) >= 3:  # level_1_difficulty
-                        level_id = parts[1]
-                        field = parts[2]  # Get the field name (difficulty, mode, etc.)
-
-                        if level_id not in level_data:
-                            level_data[level_id] = {}
-                        level_data[level_id][field] = value
-
-            # Create or update levels
-            for level_id, data in level_data.items():
-                try:
-                    if level_id.isdigit() and Level.objects.filter(id=level_id, scenario=scenario).exists():
-                        level = Level.objects.get(id=level_id)
-                        existing_level_ids.add(level.id)
-                    else:
-                        level = Level(scenario=scenario)
-
-                    # Update level fields
-                    level.difficulty = data.get('difficulty', 'beginner')
-                    level.mode = data.get('mode', 'singleplayer')
-                    level.tools = data.get('tools', '')
+            try:
+                if level:
+                    # Update existing level
+                    level.difficulty = level_data['difficulty']
+                    level.mode = level_data['mode']
+                    level.tools = level_data['tools']
                     try:
-                        level.recommended_time = int(data.get('time', 0))
+                        level.recommended_time = int(level_data['recommended_time'])
                     except (ValueError, TypeError):
                         level.recommended_time = 0
-
                     level.save()
+                else:
+                    # Create new level
+                    Level.objects.create(
+                        scenario=scenario,
+                        difficulty=level_data['difficulty'],
+                        mode=level_data['mode'],
+                        tools=level_data['tools'],
+                        recommended_time=int(level_data['recommended_time'])
+                    )
+            except Exception as e:
+                messages.error(request, f'Error processing level: {str(e)}')
 
-                    if level.id:
-                        existing_level_ids.add(level.id)
-                except Exception as e:
-                    messages.error(request, f'Error processing level {level_id}: {str(e)}')
-
-            # Delete removed levels
-            Level.objects.filter(scenario=scenario).exclude(id__in=existing_level_ids).delete()
-
-            messages.success(request, 'Scenario details and levels updated successfully!')
+            messages.success(request, 'Scenario details and level updated successfully!')
             return redirect('scenario:ScenarioAddDescription', scenario_id=scenario.id)
 
         except Exception as e:
@@ -772,7 +759,7 @@ def manage_scenario_description(request, scenario_id):
     context = {
         'scenario': scenario,
         'scenario_details': scenario_details,
-        'levels': levels,
+        'level': level,
         'difficulty_choices': Level.DIFFICULTY_CHOICES,
         'mode_choices': Level.MODE_CHOICES
     }
