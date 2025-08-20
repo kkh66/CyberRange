@@ -14,7 +14,6 @@ from rating.models import ScenarioRating
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_http_methods
 from datetime import timedelta
-import json
 
 
 @login_required

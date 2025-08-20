@@ -15,7 +15,16 @@ async function createWindow() {
         }
     });
 
-    await mainWindow.loadURL('http://localhost:8000/');
+    try {
+        await mainWindow.loadURL('http://localhost:8000/');
+    } catch (error) {
+
+        dialog.showErrorBox('Connection Error', 
+            'Failed to connect to the server. ');
+        mainWindow = null;
+        app.quit();
+        return;
+    }
 
     mainWindow.on('close', async (e) => {
         e.preventDefault();
