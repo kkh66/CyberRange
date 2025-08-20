@@ -1,1 +1,5 @@
-pip install django,mysqlclient 2.2.4,docker
+# Cyber Range 
+It is an Tarumt FYP project.
+It base on docker, django, html, css, js.
+## Installation
+<code>python -m pip install requirements.txt</code>
